@@ -1,0 +1,48 @@
+
+# -*- mode: python ; coding: utf-8 -*-
+
+block_cipher = None
+
+a = Analysis(
+    ['app.py'],
+    pathex=['.'],
+    binaries=[],
+    datas=[('templates/index.html', 'templates'), ('templates/md2pdf.html', 'templates'), ('templates/plan_generator.html', 'templates'), ('templates/project_info.html', 'templates'), ('static/noteNB/index.html', 'static/noteNB'), ('static/noteNB/logo.png', 'static/noteNB'), ('static/noteNB/assets/index-BXaTaQpt.js', 'static/noteNB/assets'), ('static/noteNB/assets/index-C9wlhvwb.css', 'static/noteNB/assets'), ('static/md2pdf/index.html', 'static/md2pdf'), ('D:\\todo-app\\.venv\\Lib\\site-packages\\playwright', 'playwright')],
+    hiddenimports=['flask', 'flask.__main__', 'werkzeug', 'werkzeug._internal', 'jinja2', 'jinja2.ext', 'markupsafe', 'markupsafe._markupsafe', 'itsdangerous', 'click', 'click._bashcomplete', 'blinker', 'markdown', 'markdown.extensions', 'markdown.extensions.extra', 'markdown.extensions.codehilite', 'markdown.extensions.tables', 'markdown.extensions.fenced_code', 'markdown.extensions.footnotes', 'markdown.extensions.toc', 'markdown.extensions.sane_lists', 'playwright', 'playwright._impl', 'playwright._impl._connection', 'playwright._impl._transport', 'playwright._impl._api_structures', 'playwright._impl._page', 'playwright._impl._browser', 'playwright._impl._browser_context', 'playwright._impl._network', 'playwright._impl._element_handle', 'playwright._impl._frame', 'playwright._impl._api_types', 'playwright._impl._errors', 'playwright._impl._selectors', 'playwright._impl._download', 'playwright._impl._console_message', 'playwright._impl._request', 'playwright._impl._response', 'playwright._impl._route', 'playwright._impl._websocket', 'playwright._impl._timeout_settings', 'playwright._impl._locator', 'playwright._impl._regex', 'playwright._impl._utils', 'playwright._impl._sandbox', 'playwright._impl._process', 'playwright._impl._transport', 'playwright.sync_api', 'playwright.async_api', 'docx', 'docx.opc', 'docx.opc.constants', 'docx.opc.oxml', 'docx.opc.package', 'docx.opc.part', 'docx.opc.spec', 'docx.opc.uri', 'docx.oxml', 'docx.oxml.ns', 'docx.oxml.parser', 'docx.oxml.text', 'docx.oxml.text.paragraph', 'docx.oxml.text.run', 'docx.oxml.shared', 'docx.oxml.shape', 'docx.oxml.table', 'docx.text', 'docx.text.paragraph', 'docx.text.run', 'docx.text.font', 'docx.text.tabstops', 'docx.table', 'docx.table._cell', 'docx.table._column', 'docx.table._row', 'docx.table._table', 'docx.shared', 'docx.image', 'lxml', 'lxml.etree', 'lxml._elementpath', 'lxml.objectify', 'lxml.builder', 'lxml.html', 'lxml.html.clean', 'numpy', 'pkgutil', 'email', 'email.mime', 'email.mime.text', 'email.mime.multipart', 'http', 'http.client', 'http.server', 'http.cookiejar', 'http.cookies', 'json', 'urllib', 'urllib.request', 'urllib.response', 'urllib.parse', 'urllib.error', 'socket', 'ssl', 'threading', 'threading._dummy_threading', 'threading._threading_local', 'queue', 'concurrent', 'concurrent.futures', 'concurrent.futures._base', 'concurrent.futures._thread', 'concurrent.futures.process', 'multiprocessing', 'multiprocessing._dummy', 'multiprocessing.pool', 'multiprocessing.process', 'multiprocessing.managers', 'multiprocessing.shared_memory', 'multiprocessing.resource_sharer', 'multiprocessing.connection', 'multiprocessing.synchronize', 'multiprocessing.util', 'sqlite3', 'sqlite3.dbapi2', 'tempfile', 'shutil', 'zipfile', 'tarfile', 'gzip', 'bz2', 'lzma', 'os', 'io', 're', 'sys', 'time', 'datetime', 'dateutil', 'dateutil.parser', 'dateutil.tz', 'dateutil.relativedelta', 'dateutil.rrule', 'dateutil.easter', 'dateutil.parser._parser', 'dateutil.parser.isoparser', 'dateutil._common', 'dateutil._utils', 'dateutil._tzstr', 'dateutil._version', 'six', 'pkg_resources', 'setuptools', 'setuptools._vendor', 'setuptools._vendor.packaging', 'setuptools._vendor.packaging.version', 'setuptools._vendor.packaging.specifiers', 'setuptools._vendor.packaging.requirements', 'setuptools._vendor.packaging._structures', 'setuptools._vendor.packaging._tokenizer', 'setuptools._vendor.packaging._parser', 'setuptools._vendor.packaging._compat', 'setuptools._vendor.packaging._typing', 'setuptools._vendor.packaging._utils', 'greenlet', 'greenlet._greenlet', 'cryptography', 'cryptography.hazmat', 'cryptography.hazmat.backends', 'cryptography.hazmat.backends.openssl', 'cryptography.hazmat.binding', 'cryptography.hazmat.binding.openssl', 'cryptography.hazmat.primitives', 'cryptography.hazmat.primitives.asymmetric', 'cryptography.hazmat.primitives.asymmetric.rsa', 'cryptography.hazmat.primitives.asymmetric.dsa', 'cryptography.hazmat.primitives.asymmetric.ec', 'cryptography.hazmat.primitives.asymmetric.padding', 'cryptography.hazmat.primitives.ciphers', 'cryptography.hazmat.primitives.ciphers.algorithms', 'cryptography.hazmat.primitives.ciphers.modes', 'cryptography.hazmat.primitives.kdf', 'cryptography.hazmat.primitives.kdf.pbkdf2', 'cryptography.hazmat.primitives.kdf.hkdf', 'cryptography.hazmat.primitives.kdf.concatkdf', 'cryptography.hazmat.primitives.kdf.x963kdf', 'cryptography.hazmat.primitives.kdf.scrypt', 'cryptography.hazmat.primitives.hashes', 'cryptography.hazmat.primitives.serialization', 'cryptography.hazmat.primitives.asymmetric.utils', 'cryptography.hazmat.primitives.asymmetric.ed25519', 'cryptography.hazmat.primitives.asymmetric.ed448', 'cryptography.hazmat.primitives.asymmetric.x25519', 'cryptography.hazmat.primitives.asymmetric.x448', 'cryptography.hazmat.primitives.cmac', 'cryptography.hazmat.primitives.poly1305', 'cryptography.hazmat.primitives.siphash', 'cryptography.hazmat.primitives.twofactor', 'cryptography.hazmat.primitives.twofactor.totp', 'cryptography.hazmat.primitives.twofactor.hotp', 'cryptography.hazmat.primitives.padding', 'cryptography.hazmat.primitives.constant_time', 'cryptography.hazmat.primitives.kdf.x963kdf', 'cryptography.hazmat.primitives.kdf.concatkdf', 'cryptography.hazmat.primitives.kdf.hkdf', 'cryptography.hazmat.primitives.kdf.pbkdf2', 'cryptography.hazmat.primitives.kdf.scrypt', 'cryptography.hazmat.backends.openssl.backend', 'cryptography.x509', 'cffi', 'cffi.api', 'cffi.backend_ctypes', 'cffi.verifier', 'cffi.lock', 'cffi.model', 'cffi.parser', 'cffi.cparser', 'cffi.error', 'cffi.vengine_cpy', 'cffi.vengine_gen', 'cffi.setuptools_ext', 'cffi.distutils_ext', '_cffi_backend', 'webbrowser', 'logging', 'traceback', 'inspect', 'ctypes', 'ctypes._endian', 'hashlib', 'hmac', 'base64', 'binascii', 'collections', 'collections.abc', 'operator', 'functools', 'itertools', 'types', 'weakref', 'gc', 'atexit', 'signal', 'errno', 'pickle', 'marshal', 'copy', 'copyreg', 'quopri', 'encodings', 'encodings.utf_8', 'encodings.gbk', 'encodings.ascii', 'encodings.latin_1', 'encodings.unicode_escape', 'encodings.raw_unicode_escape', 'encodings.hex_codec', 'encodings.idna', 'encodings.mbcs', 'encodings.cp1252', 'encodings.cp437', 'encodings.cp850', 'encodings.cp852', 'encodings.cp855', 'encodings.cp857', 'encodings.cp860', 'encodings.cp861', 'encodings.cp862', 'encodings.cp863', 'encodings.cp864', 'encodings.cp865', 'encodings.cp866', 'encodings.cp869', 'encodings.cp874', 'encodings.cp875', 'encodings.cp932', 'encodings.cp949', 'encodings.cp950', 'encodings.cp1250', 'encodings.cp1251', 'encodings.cp1252', 'encodings.cp1253', 'encodings.cp1254', 'encodings.cp1255', 'encodings.cp1256', 'encodings.cp1257', 'encodings.cp1258', 'encodings.big5', 'encodings.big5hkscs', 'encodings.euc_jp', 'encodings.euc_jis_2004', 'encodings.euc_jisx0213', 'encodings.euc_kr', 'encodings.gb2312', 'encodings.gbk', 'encodings.gb18030', 'encodings.hp_roman8', 'encodings.iso2022_jp', 'encodings.iso2022_jp_1', 'encodings.iso2022_jp_2', 'encodings.iso2022_jp_2004', 'encodings.iso2022_jp_3', 'encodings.iso2022_jp_ext', 'encodings.iso2022_kr', 'encodings.johab', 'encodings.koi8_r', 'encodings.koi8_t', 'encodings.koi8_u', 'encodings.mac_roman', 'encodings.mac_turkish', 'encodings.mac_croatian', 'encodings.mac_romanian', 'encodings.mac_iceland', 'encodings.mac_latin2', 'encodings.mac_greek', 'encodings.mac_cyrillic', 'encodings.mac_thai', 'encodings.mac_centraleurope', 'encodings.mac_farsi', 'encodings.mac_arabic', 'encodings.mac_baltic', 'encodings.mac_hebrew', 'encodings.mac_japanese', 'encodings.mac_korean', 'encodings.palmos', 'encodings.ptcp154', 'encodings.tis_620', 'encodings.utf_16', 'encodings.utf_16_be', 'encodings.utf_16_le', 'encodings.utf_7', 'encodings.utf_8_sig', 'encodings.idna', 'encodings.raw_unicode_escape', 'encodings.unicode_escape', 'encodings.string_escape', 'encodings.rot_13', 'encodings.zlib_codec', 'encodings.bz2_codec', 'encodings.lzma_codec', 'encodings.pkcs7', 'encodings.quopri_codec', 'encodings.base64_codec', 'encodings.ascii', 'encodings.latin_1', 'encodings.utf_8', 'encodings.cp1252', 'encodings.mbcs'],
+    hookspath=[],
+    runtime_hooks=[],
+    excludes=[],
+    win_no_prefer_redirects=False,
+    win_private_assemblies=False,
+    cipher=block_cipher,
+    noarchive=False,
+)
+
+pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
+
+exe = EXE(
+    pyz,
+    a.scripts,
+    [],
+    exclude_binaries=True,
+    name='工具1.0',
+    debug=False,
+    bootloader_ignore_signals=False,
+    strip=False,
+    upx=False,
+    console=True,
+    disable_windowed_traceback=False,
+    target_arch=None,
+    codesign_identity=None,
+    entitlements_file=None,
+)
+
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    strip=False,
+    upx=False,
+    name='工具1.0',
+)

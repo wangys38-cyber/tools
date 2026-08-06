@@ -1,0 +1,12 @@
+{
+  "name": "feishu-test-task-manager",
+  "version": "1.0.0",
+  "description": "飞书测试任务管理网页应用",
+  "scripts": {
+    "build": "mkdir -p dist && cp -r index.html css js dist/",
+    "deploy": "gh-pages -d dist"
+  },
+  "devDependencies": {
+    "gh-pages": "^5.0.0"
+  }
+}

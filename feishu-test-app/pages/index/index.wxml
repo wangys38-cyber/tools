@@ -1,0 +1,113 @@
+<view class="container">
+  <view class="header">
+    <view class="header-title">测试任务管理</view>
+    <view class="header-subtitle">共 {{tasks.length}} 个任务</view>
+  </view>
+
+  <view class="stats-row">
+    <view class="stat-card">
+      <view class="stat-icon pending-icon">📋</view>
+      <view class="stat-info">
+        <view class="stat-value">{{pendingCount}}</view>
+        <view class="stat-label">待开始</view>
+      </view>
+    </view>
+    <view class="stat-card">
+      <view class="stat-icon progress-icon">🚀</view>
+      <view class="stat-info">
+        <view class="stat-value">{{inProgressCount}}</view>
+        <view class="stat-label">进行中</view>
+      </view>
+    </view>
+    <view class="stat-card">
+      <view class="stat-icon completed-icon">✅</view>
+      <view class="stat-info">
+        <view class="stat-value">{{completedCount}}</view>
+        <view class="stat-label">已完成</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="filter-bar">
+    <view 
+      class="filter-item {{currentFilter === 'all' ? 'active' : ''}}"
+      bindtap="setFilter('all')"
+    >
+      全部
+    </view>
+    <view 
+      class="filter-item {{currentFilter === 'pending' ? 'active' : ''}}"
+      bindtap="setFilter('pending')"
+    >
+      待开始
+    </view>
+    <view 
+      class="filter-item {{currentFilter === 'in_progress' ? 'active' : ''}}"
+      bindtap="setFilter('in_progress')"
+    >
+      进行中
+    </view>
+    <view 
+      class="filter-item {{currentFilter === 'completed' ? 'active' : ''}}"
+      bindtap="setFilter('completed')"
+    >
+      已完成
+    </view>
+  </view>
+
+  <view class="task-list">
+    <view 
+      wx:for="{{filteredTasks}}" 
+      wx:key="id" 
+      class="task-card"
+      bindtap="goToTask"
+      data-id="{{item.id}}"
+    >
+      <view class="task-header">
+        <view class="task-title">{{item.title}}</view>
+        <view class="task-status {{'status-' + item.status}}">
+          {{getStatusText(item.status)}}
+        </view>
+      </view>
+      
+      <view class="task-meta">
+        <view class="meta-item">
+          <text class="meta-icon">👤</text>
+          <text>{{item.assignee}}</text>
+        </view>
+        <view class="meta-item">
+          <text class="meta-icon">📅</text>
+          <text>{{item.startTime || '未开始'}}</text>
+        </view>
+      </view>
+
+      <view class="task-progress" wx:if="{{item.status !== 'pending'}}">
+        <view class="progress-bar">
+          <view class="progress-fill" style="width: {{item.progress}}%"></view>
+        </view>
+        <view class="progress-text">进度 {{item.progress}}%</view>
+      </view>
+
+      <view class="task-action">
+        <text class="action-text">查看详情</text>
+        <text class="action-arrow">→</text>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:if="{{filteredTasks.length === 0}}">
+      <view class="empty-icon">📭</view>
+      <view class="empty-text">暂无任务</view>
+    </view>
+  </view>
+
+  <view class="bottom-nav">
+    <view class="nav-item active">
+      <view class="nav-icon">📋</view>
+      <view class="nav-text">任务列表</view>
+    </view>
+    <view class="nav-item" bindtap="goToCreate">
+      <view class="nav-icon">➕</view>
+      <view class="nav-text">创建任务</view>
+    </view>
+  </view>
+</view>

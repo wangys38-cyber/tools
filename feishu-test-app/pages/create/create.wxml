@@ -1,0 +1,70 @@
+<view class="container">
+  <view class="page-title">创建测试任务</view>
+
+  <view class="form-card">
+    <view class="form-item">
+      <view class="form-label">任务名称 *</view>
+      <input 
+        class="form-input" 
+        placeholder="请输入任务名称"
+        value="{{formData.title}}"
+        bindinput="onInput"
+        data-field="title"
+      />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">任务描述</view>
+      <textarea 
+        class="form-textarea" 
+        placeholder="请输入任务描述"
+        value="{{formData.description}}"
+        bindinput="onInput"
+        data-field="description"
+      />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">测试人员 *</view>
+      <view class="picker-container">
+        <picker mode="selector" range="{{testers}}" range-key="name" bindchange="onTesterChange">
+          <view class="picker-value">
+            {{formData.assignee || '请选择测试人员'}}
+            <text class="picker-arrow">▼</text>
+          </view>
+        </picker>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">预估天数 *</view>
+      <view class="number-input">
+        <view class="number-btn" bindtap="decreaseDays">-</view>
+        <input 
+          class="number-value" 
+          type="number"
+          value="{{formData.estimatedDays}}"
+          bindinput="onInput"
+          data-field="estimatedDays"
+        />
+        <view class="number-btn" bindtap="increaseDays">+</view>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">任务备注</view>
+      <textarea 
+        class="form-textarea" 
+        placeholder="请输入备注信息"
+        value="{{formData.remark}}"
+        bindinput="onInput"
+        data-field="remark"
+      />
+    </view>
+  </view>
+
+  <view class="form-actions">
+    <button class="btn btn-secondary" bindtap="resetForm">重置</button>
+    <button class="btn btn-primary" bindtap="submitForm">创建任务</button>
+  </view>
+</view>

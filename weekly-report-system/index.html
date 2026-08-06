@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IOT设备软件开发项目 - 周报系统</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>IOT设备软件开发项目 - 周报系统</h1>
+            <p class="subtitle">功耗 | 性能 | 功能集成 | 稳定性 | 算法</p>
+        </header>
+
+        <nav class="tab-nav">
+            <button class="tab-btn active" onclick="showTab('input')">填写周报</button>
+            <button class="tab-btn" onclick="showTab('table')">历史数据</button>
+            <button class="tab-btn" onclick="showTab('charts')">数据图表</button>
+        </nav>
+
+        <main>
+            <!-- 周报输入表单 -->
+            <section id="input" class="tab-content active">
+                <div class="form-container">
+                    <h2>填写周报</h2>
+                    <form id="report-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="week">周次</label>
+                                <input type="text" id="week" placeholder="如：2024-W01" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="date">日期</label>
+                                <input type="date" id="date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="author">作者</label>
+                                <input type="text" id="author" placeholder="姓名" required>
+                            </div>
+                        </div>
+
+                        <div class="metrics-section">
+                            <h3>核心指标评分（1-10分）</h3>
+                            <div class="metrics-grid">
+                                <div class="metric-item">
+                                    <label for="power">功耗优化</label>
+                                    <input type="range" id="power" min="1" max="10" value="5">
+                                    <span class="metric-value" id="power-value">5</span>
+                                </div>
+                                <div class="metric-item">
+                                    <label for="performance">性能指标</label>
+                                    <input type="range" id="performance" min="1" max="10" value="5">
+                                    <span class="metric-value" id="performance-value">5</span>
+                                </div>
+                                <div class="metric-item">
+                                    <label for="integration">功能集成</label>
+                                    <input type="range" id="integration" min="1" max="10" value="5">
+                                    <span class="metric-value" id="integration-value">5</span>
+                                </div>
+                                <div class="metric-item">
+                                    <label for="stability">稳定性</label>
+                                    <input type="range" id="stability" min="1" max="10" value="5">
+                                    <span class="metric-value" id="stability-value">5</span>
+                                </div>
+                                <div class="metric-item">
+                                    <label for="algorithm">算法优化</label>
+                                    <input type="range" id="algorithm" min="1" max="10" value="5">
+                                    <span class="metric-value" id="algorithm-value">5</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="progress">本周进展</label>
+                            <textarea id="progress" rows="4" placeholder="请描述本周主要工作进展..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="issues">问题与风险</label>
+                            <textarea id="issues" rows="3" placeholder="请描述遇到的问题和风险..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="nextWeek">下周计划</label>
+                            <textarea id="nextWeek" rows="3" placeholder="请描述下周工作计划..."></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">提交周报</button>
+                            <button type="button" class="btn btn-secondary" onclick="resetForm()">重置</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 历史数据表格 -->
+            <section id="table" class="tab-content">
+                <div class="table-container">
+                    <div class="table-header">
+                        <h2>周报历史数据</h2>
+                        <button class="btn btn-export" onclick="exportData()">导出数据</button>
+                    </div>
+                    <table id="report-table">
+                        <thead>
+                            <tr>
+                                <th>周次</th>
+                                <th>日期</th>
+                                <th>作者</th>
+                                <th>功耗</th>
+                                <th>性能</th>
+                                <th>功能集成</th>
+                                <th>稳定性</th>
+                                <th>算法</th>
+                                <th>进展摘要</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="report-table-body"></tbody>
+                    </table>
+                    <div id="empty-table" class="empty-state">
+                        <p>暂无周报数据，请先填写周报</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 数据图表 -->
+            <section id="charts" class="tab-content">
+                <div class="charts-container">
+                    <h2>数据可视化图表</h2>
+                    
+                    <div class="chart-row">
+                        <div class="chart-card">
+                            <h3>指标趋势图（折线图）</h3>
+                            <canvas id="lineChart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>最新周指标对比（柱状图）</h3>
+                            <canvas id="barChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-row">
+                        <div class="chart-card full-width">
+                            <h3>各项指标对比（雷达图）</h3>
+                            <canvas id="radarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- 预览模态框 -->
+        <div id="preview-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <h3>周报预览</h3>
+                <div id="preview-content"></div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" onclick="closePreview()">关闭</button>
+                    <button class="btn btn-primary" onclick="exportPreview()">导出</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

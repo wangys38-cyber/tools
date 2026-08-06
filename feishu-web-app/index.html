@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>测试任务管理 - 飞书网页应用</title>
+  <meta name="description" content="测试任务管理系统，用于分配测试任务和跟踪进度">
+  
+  <!-- 飞书SDK -->
+  <script src="https://lf-copilot.bytedance.net/api/text/sdk.js?appId=cli_aaa50689fff81bb7"></script>
+  
+  <!-- 图标库 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- 样式文件 -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- 登录页面 -->
+  <div id="login-page" class="page">
+    <!-- 背景装饰 -->
+    <div class="login-bg-decoration"></div>
+    <div class="login-bg-decoration second"></div>
+    
+    <div class="login-container">
+      <div class="login-card">
+        <div class="login-logo-wrapper">
+          <div class="login-logo">
+            <i class="fa-solid fa-flask-vial"></i>
+          </div>
+        </div>
+        <h1>测试任务管理</h1>
+        <p>分配测试任务，跟踪测试进度</p>
+        <button id="login-btn">
+          <i class="fa-solid fa-sign-in"></i>
+          <span>使用飞书登录</span>
+        </button>
+      </div>
+      
+      <!-- 底部版权信息 -->
+      <div class="login-footer">
+        <p>Powered by yongshuo 2026</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主应用页面 -->
+  <div id="app-page" class="page" style="display: none;">
+    <!-- 顶部导航 -->
+    <header class="header">
+      <div class="header-left">
+        <i class="fa-solid fa-flask-vial header-icon"></i>
+        <h2>测试任务管理</h2>
+      </div>
+      <div class="header-right">
+        <div class="user-info">
+          <img id="user-avatar" src="" alt="头像" class="avatar">
+          <span id="user-name">用户</span>
+        </div>
+        <button id="logout-btn" class="btn btn-sm btn-secondary">
+          <i class="fa-solid fa-sign-out"></i>
+          退出
+        </button>
+      </div>
+    </header>
+
+    <!-- 主内容区域 -->
+    <main class="main-content">
+      <!-- 左侧导航 -->
+      <nav class="sidebar">
+        <div class="nav-item active" data-page="tasks">
+          <i class="fa-solid fa-list-check"></i>
+          <span>任务列表</span>
+        </div>
+        <div class="nav-item" data-page="create">
+          <i class="fa-solid fa-plus-circle"></i>
+          <span>创建任务</span>
+        </div>
+        <div class="nav-item" data-page="testers">
+          <i class="fa-solid fa-users"></i>
+          <span>测试人员</span>
+        </div>
+        <div class="nav-item" data-page="statistics">
+          <i class="fa-solid fa-chart-bar"></i>
+          <span>统计分析</span>
+        </div>
+      </nav>
+
+      <!-- 右侧内容 -->
+      <div class="content-area">
+        <!-- 任务列表页面 -->
+        <div id="tasks-page" class="content-page">
+          <div class="page-header">
+            <h3>任务列表</h3>
+            <div class="filter-bar">
+              <button class="filter-btn active" data-filter="all">全部</button>
+              <button class="filter-btn" data-filter="pending">待开始</button>
+              <button class="filter-btn" data-filter="in_progress">进行中</button>
+              <button class="filter-btn" data-filter="completed">已完成</button>
+            </div>
+          </div>
+
+          <div class="stats-cards">
+            <div class="stat-card pending">
+              <div class="stat-icon">📋</div>
+              <div class="stat-info">
+                <div class="stat-value" id="pending-count">0</div>
+                <div class="stat-label">待开始</div>
+              </div>
+            </div>
+            <div class="stat-card progress">
+              <div class="stat-icon">🚀</div>
+              <div class="stat-info">
+                <div class="stat-value" id="progress-count">0</div>
+                <div class="stat-label">进行中</div>
+              </div>
+            </div>
+            <div class="stat-card completed">
+              <div class="stat-icon">✅</div>
+              <div class="stat-info">
+                <div class="stat-value" id="completed-count">0</div>
+                <div class="stat-label">已完成</div>
+              </div>
+            </div>
+          </div>
+
+          <div id="task-list" class="task-list">
+            <!-- 任务卡片将通过JS动态生成 -->
+          </div>
+
+          <div id="empty-tasks" class="empty-state">
+            <i class="fa-solid fa-inbox"></i>
+            <p>暂无任务</p>
+          </div>
+        </div>
+
+        <!-- 创建任务页面 -->
+        <div id="create-page" class="content-page" style="display: none;">
+          <div class="page-header">
+            <h3>创建测试任务</h3>
+          </div>
+
+          <form id="create-form" class="form-card">
+            <div class="form-group">
+              <label for="task-title">任务名称 *</label>
+              <input type="text" id="task-title" placeholder="请输入任务名称" required>
+            </div>
+
+            <div class="form-group">
+              <label for="task-desc">任务描述</label>
+              <textarea id="task-desc" placeholder="请输入任务描述"></textarea>
+            </div>
+
+            <div class="form-group">
+              <label for="task-assignee">测试人员 *</label>
+              <select id="task-assignee" required>
+                <option value="">请选择测试人员</option>
+                <option value="user1">张三</option>
+                <option value="user2">李四</option>
+                <option value="user3">王五</option>
+                <option value="user4">赵六</option>
+                <option value="user5">钱七</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="task-days">预估天数 *</label>
+              <div class="number-input">
+                <button type="button" class="num-btn" onclick="decreaseDays()">-</button>
+                <input type="number" id="task-days" value="3" min="1" max="30" required>
+                <button type="button" class="num-btn" onclick="increaseDays()">+</button>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" onclick="resetForm()">重置</button>
+              <button type="submit" class="btn btn-primary">创建任务</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 测试人员管理页面 -->
+        <div id="testers-page" class="content-page" style="display: none;">
+          <div class="page-header">
+            <h3>测试人员管理</h3>
+            <button class="btn btn-primary" onclick="showAddTesterModal()">
+              <i class="fa-solid fa-plus"></i>
+              添加测试人员
+            </button>
+          </div>
+
+          <div id="testers-list" class="testers-grid">
+            <!-- 测试人员列表将通过JS动态生成 -->
+          </div>
+
+          <div id="empty-testers" class="empty-state" style="display: none;">
+            <i class="fa-solid fa-users"></i>
+            <p>暂无测试人员，请添加</p>
+          </div>
+        </div>
+
+        <!-- 统计分析页面 -->
+        <div id="statistics-page" class="content-page" style="display: none;">
+          <div class="page-header">
+            <h3>统计分析</h3>
+          </div>
+
+          <div class="stats-grid">
+            <div class="chart-card">
+              <h4>任务状态分布</h4>
+              <canvas id="status-chart"></canvas>
+            </div>
+            <div class="chart-card">
+              <h4>测试进度趋势</h4>
+              <canvas id="progress-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="ranking-card">
+            <h4>测试人员效率排行</h4>
+            <table class="ranking-table">
+              <thead>
+                <tr>
+                  <th>排名</th>
+                  <th>测试人员</th>
+                  <th>完成任务</th>
+                  <th>平均进度</th>
+                </tr>
+              </thead>
+              <tbody id="ranking-body">
+                <!-- 排行数据将通过JS动态生成 -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 任务详情弹窗 -->
+    <div id="task-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modal-title">任务详情</h3>
+          <button class="close-btn" onclick="closeModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="modal-info">
+            <div class="info-row">
+              <span class="info-label">状态：</span>
+              <span id="modal-status" class="status-badge">待开始</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">测试人员：</span>
+              <span id="modal-assignee">张三</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">预估天数：</span>
+              <span id="modal-days">3天</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">开始时间：</span>
+              <span id="modal-start">未开始</span>
+            </div>
+          </div>
+          <div class="progress-section">
+            <div class="progress-header">
+              <span>当前进度</span>
+              <span id="modal-progress-value">0%</span>
+            </div>
+            <div class="progress-bar">
+              <div id="modal-progress-fill" class="progress-fill"></div>
+            </div>
+          </div>
+          <div class="history-section">
+            <h4>进度记录</h4>
+            <div id="modal-history" class="history-list">
+              <!-- 历史记录将通过JS动态生成 -->
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="start-btn" class="btn btn-success" style="display: none;" onclick="startTask()">
+            <i class="fa-solid fa-play"></i> 开始测试
+          </button>
+          <button id="progress-btn" class="btn btn-primary" style="display: none;" onclick="openProgressUpdate()">
+            <i class="fa-solid fa-chart-line"></i> 更新进度
+          </button>
+          <button id="complete-btn" class="btn btn-info" style="display: none;" onclick="completeTask()">
+            <i class="fa-solid fa-check-circle"></i> 完成任务
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 进度更新弹窗 -->
+    <div id="progress-modal" class="modal" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>更新测试进度</h3>
+          <button class="close-btn" onclick="closeProgressModal()">×</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>选择进度 *</label>
+            <div class="progress-options">
+              <button class="progress-option" data-value="10">10%</button>
+              <button class="progress-option" data-value="20">20%</button>
+              <button class="progress-option" data-value="30">30%</button>
+              <button class="progress-option" data-value="40">40%</button>
+              <button class="progress-option" data-value="50">50%</button>
+              <button class="progress-option" data-value="60">60%</button>
+              <button class="progress-option" data-value="70">70%</button>
+              <button class="progress-option" data-value="80">80%</button>
+              <button class="progress-option" data-value="90">90%</button>
+              <button class="progress-option" data-value="100">100%</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>进度说明 *</label>
+            <textarea id="progress-remark" placeholder="请输入今日测试进度说明"></textarea>
+          </div>
+          <div class="form-group">
+            <label>遇到的问题</label>
+            <textarea id="progress-issues" placeholder="如有问题请在此描述"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" onclick="closeProgressModal()">取消</button>
+          <button class="btn btn-primary" onclick="submitProgress()">提交进度</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 删除确认弹窗 -->
+  <div id="delete-modal" class="modal" style="display: none;">
+    <div class="modal-content delete-modal">
+      <div class="modal-header">
+        <h3>确认删除</h3>
+        <button class="close-btn" onclick="closeDeleteModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="delete-icon">
+          <i class="fa-solid fa-trash"></i>
+        </div>
+        <p>确定要删除任务 "<span id="delete-task-title"></span>" 吗？</p>
+        <p class="delete-warning">此操作不可撤销！</p>
+        <input type="hidden" id="delete-task-id">
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeDeleteModal()">取消</button>
+        <button class="btn btn-danger" onclick="deleteTask()">确认删除</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 添加测试人员弹窗 -->
+  <div id="add-tester-modal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>添加测试人员</h3>
+        <button class="close-btn" onclick="closeAddTesterModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="add-tester-form" onsubmit="addTester(event)">
+          <div class="form-group">
+            <label>姓名 *</label>
+            <input type="text" id="tester-name" required placeholder="请输入测试人员姓名">
+          </div>
+          <div class="form-group">
+            <label>飞书ID *</label>
+            <input type="text" id="tester-id" required placeholder="请输入飞书用户ID">
+          </div>
+          <div class="form-group">
+            <label>邮箱</label>
+            <input type="email" id="tester-email" placeholder="请输入邮箱（选填）">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeAddTesterModal()">取消</button>
+        <button class="btn btn-primary" onclick="document.getElementById('add-tester-form').dispatchEvent(new Event('submit'))">添加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast消息 -->
+  <div id="toast" class="toast" style="display: none;">
+    <i class="fa-solid fa-check-circle"></i>
+    <span id="toast-message">操作成功</span>
+  </div>
+
+  <!-- 脚本文件 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

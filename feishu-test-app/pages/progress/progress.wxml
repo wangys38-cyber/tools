@@ -1,0 +1,82 @@
+<view class="container">
+  <view class="page-title">更新测试进度</view>
+
+  <view class="task-info" wx:if="{{task}}">
+    <view class="task-name">{{task.title}}</view>
+    <view class="task-assignee">测试人员：{{task.assignee}}</view>
+  </view>
+
+  <view class="progress-form" wx:if="{{task}}">
+    <view class="form-item">
+      <view class="form-label">今日进度 *</view>
+      <view class="progress-selector">
+        <view 
+          wx:for="{{progressOptions}}" 
+          wx:key="value"
+          class="progress-option {{selectedProgress === item.value ? 'active' : ''}}"
+          bindtap="selectProgress"
+          data-value="{{item.value}}"
+        >
+          {{item.label}}
+        </view>
+      </view>
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">进度说明 *</view>
+      <textarea 
+        class="remark-input" 
+        placeholder="请输入今日测试进度说明，例如：完成了哪些测试用例，遇到了什么问题等"
+        value="{{remark}}"
+        bindinput="onRemarkInput"
+      />
+    </view>
+
+    <view class="form-item">
+      <view class="form-label">遇到的问题</view>
+      <textarea 
+        class="remark-input" 
+        placeholder="如有问题请在此描述"
+        value="{{issues}}"
+        bindinput="onIssuesInput"
+      />
+    </view>
+
+    <view class="current-progress">
+      <view class="progress-header">
+        <text>当前进度</text>
+        <text class="progress-value">{{task.progress}}%</text>
+      </view>
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{task.progress}}%"></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="form-actions">
+    <button class="btn btn-secondary" bindtap="goBack">取消</button>
+    <button class="btn btn-primary" bindtap="submitProgress">提交进度</button>
+  </view>
+
+  <view class="history-section" wx:if="{{task && task.progressHistory.length > 0}}">
+    <view class="section-title">历史记录</view>
+    <view class="history-list">
+      <view 
+        wx:for="{{task.progressHistory}}" 
+        wx:key="index" 
+        class="history-item"
+      >
+        <view class="history-date">{{item.date}}</view>
+        <view class="history-content">
+          <view class="history-progress-bar">
+            <view class="history-progress-fill" style="width: {{item.progress}}%"></view>
+          </view>
+          <view class="history-info">
+            <text class="history-percent">{{item.progress}}%</text>
+            <text class="history-remark">- {{item.remark}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>

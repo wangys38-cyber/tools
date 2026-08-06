@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试管理平台</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 登录页面 -->
+    <div id="login-page" class="login-page">
+        <div class="login-container">
+            <h2>测试管理平台</h2>
+            <div class="login-form">
+                <input type="email" id="login-username" placeholder="邮箱" />
+                <input type="password" id="login-password" placeholder="密码" />
+                <select id="login-role">
+                    <option value="admin">管理员</option>
+                    <option value="tester">测试人员</option>
+                </select>
+                <button class="btn btn-primary" onclick="login()">登录</button>
+                <button class="btn btn-secondary" onclick="openRegisterModal()">注册账号</button>
+                <p id="login-error" class="error-message"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主页面 -->
+    <div id="main-page" class="container" style="display: none;">
+        <header class="header">
+            <h1>测试管理平台</h1>
+            <div class="header-right">
+                <span id="current-user">当前用户: </span>
+                <button class="btn btn-logout" onclick="logout()">退出登录</button>
+            </div>
+            <nav class="nav">
+                <button class="nav-btn active" data-section="dashboard">仪表盘</button>
+                <button class="nav-btn" data-section="modules">模块管理</button>
+                <button class="nav-btn" data-section="testcases">用例库</button>
+                <button class="nav-btn" data-section="projects">项目管理</button>
+                <button class="nav-btn" data-section="testers" id="nav-testers">测试人员管理</button>
+                <button class="nav-btn" data-section="history">测试历史</button>
+                <button class="nav-btn" data-section="mytasks">我的任务</button>
+            </nav>
+        </header>
+
+        <main class="main">
+            <section id="dashboard" class="section active">
+                <h2>项目测试进度</h2>
+                <div class="projects-list" id="dashboard-projects"></div>
+                <div id="dashboard-detail" class="dashboard-detail" style="display: none;">
+                    <h3 id="dashboard-project-name"></h3>
+                    <div class="stats-grid">
+                        <div class="stat-card total">
+                            <div class="stat-value" id="stat-total">0</div>
+                            <div class="stat-label">总用例数</div>
+                        </div>
+                        <div class="stat-card pending">
+                            <div class="stat-value" id="stat-pending">0</div>
+                            <div class="stat-label">待测试</div>
+                        </div>
+                        <div class="stat-card in-progress">
+                            <div class="stat-value" id="stat-in-progress">0</div>
+                            <div class="stat-label">进行中</div>
+                        </div>
+                        <div class="stat-card passed">
+                            <div class="stat-value" id="stat-passed">0</div>
+                            <div class="stat-label">通过</div>
+                        </div>
+                        <div class="stat-card failed">
+                            <div class="stat-value" id="stat-failed">0</div>
+                            <div class="stat-label">失败</div>
+                        </div>
+                        <div class="stat-card success-rate">
+                            <div class="stat-value" id="stat-success-rate">0%</div>
+                            <div class="stat-label">通过率</div>
+                        </div>
+                    </div>
+                    <div class="testrun-list">
+                        <div class="testrun-header">
+                            <h4>测试用例状态</h4>
+                            <button class="btn btn-danger btn-batch-cancel" onclick="cancelSelectedTestruns()">批量取消选中任务</button>
+                        </div>
+                        <table>
+                            <tbody id="dashboard-testruns"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="modules" class="section">
+                <div class="section-header">
+                    <h2>模块管理</h2>
+                    <button class="btn btn-add" onclick="openAddModuleModal()">添加模块</button>
+                </div>
+                <div class="modules-list" id="modules-list"></div>
+            </section>
+
+            <section id="testcases" class="section">
+                <div class="section-header">
+                    <h2>用例库</h2>
+                    <div class="filter-row">
+                        <select id="testcase-module-filter" onchange="filterTestcases()">
+                            <option value="">全部模块</option>
+                        </select>
+                        <button class="btn btn-add" onclick="openAddTestcaseModal()">添加用例</button>
+                        <button class="btn btn-import" onclick="openImportModal()">导入Excel</button>
+                        <button class="btn btn-delete" id="btn-batch-delete" onclick="batchDeleteTestcases()" style="display: none;">批量删除</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                <table class="testcases-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <input type="checkbox" id="select-all-testcases" onchange="toggleSelectAllTestcases()">
+                            </th>
+                            <th>用例名称</th>
+                            <th>模块</th>
+                            <th>一级功能</th>
+                            <th>二级功能</th>
+                            <th>测试前提</th>
+                            <th>测试步骤</th>
+                            <th>预期结果</th>
+                            <th>优先级</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="testcases-table-body"></tbody>
+                </table>
+                </div>
+            </section>
+
+            <section id="projects" class="section">
+                <div class="section-header">
+                    <h2>项目管理</h2>
+                    <button class="btn btn-add" onclick="openAddProjectModal()">创建项目</button>
+                </div>
+                <div class="projects-list" id="projects-list"></div>
+            </section>
+
+            <section id="testers" class="section">
+                <div class="section-header">
+                    <h2>测试人员管理</h2>
+                </div>
+                <div class="table-container">
+                <table class="testcases-table">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>真实姓名</th>
+                            <th>邮箱</th>
+                            <th>注册时间</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody id="testers-body"></tbody>
+                </table>
+                </div>
+            </section>
+
+            <section id="history" class="section">
+                <div class="section-header">
+                    <h2>测试历史</h2>
+                    <button class="btn btn-export" onclick="exportTestResults()">导出测试结果</button>
+                </div>
+                <div class="table-container">
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>项目</th>
+                            <th>用例名称</th>
+                            <th>模块</th>
+                            <th>测试人员</th>
+                            <th>测试状态</th>
+                            <th>测试时间</th>
+                            <th>备注</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body"></tbody>
+                </table>
+                </div>
+            </section>
+
+            <section id="tasks" class="section">
+                <div class="section-header">
+                    <h2>我的任务</h2>
+                </div>
+                <div id="my-tasks-debug"></div>
+                <div id="my-tasks-stats" class="stats-grid"></div>
+                <table class="testcases-table">
+                    <thead>
+                        <tr>
+                            <th>用例名称</th>
+                            <th>模块</th>
+                            <th>测试前提</th>
+                            <th>测试步骤</th>
+                            <th>预期结果</th>
+                            <th>项目</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="my-tasks-body"></tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+
+    <!-- 添加模块模态框 -->
+    <div id="add-module-modal" class="modal-overlay" style="display: none;" onclick="closeModal('add-module-modal')">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h3 id="module-modal-title">添加模块</h3>
+            <input id="module-name" type="text" placeholder="模块名称" />
+            <textarea id="module-description" placeholder="模块描述"></textarea>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeModal('add-module-modal')">取消</button>
+                <button class="btn btn-primary" onclick="saveModule()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加用例模态框 -->
+    <div id="add-testcase-modal" class="modal-overlay" style="display: none;" onclick="closeModal('add-testcase-modal')">
+        <div class="modal large-modal" onclick="event.stopPropagation()">
+            <h3 id="testcase-modal-title">添加用例</h3>
+            <input id="testcase-name" type="text" placeholder="用例名称" />
+            <select id="testcase-module">
+                <option value="">选择模块</option>
+            </select>
+            <input id="testcase-function1" type="text" placeholder="一级功能" />
+            <input id="testcase-function2" type="text" placeholder="二级功能" />
+            <textarea id="testcase-prerequisite" placeholder="测试前提"></textarea>
+            <textarea id="testcase-steps" placeholder="测试步骤（每行一个步骤）"></textarea>
+            <textarea id="testcase-expected" placeholder="预期结果"></textarea>
+            <select id="testcase-priority">
+                <option value="high">高</option>
+                <option value="medium">中</option>
+                <option value="low">低</option>
+            </select>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeModal('add-testcase-modal')">取消</button>
+                <button class="btn btn-primary" onclick="saveTestcase()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Excel上传模态框 -->
+    <div id="import-excel-modal" class="modal-overlay" style="display: none;" onclick="closeModal('import-excel-modal')">
+        <div class="modal large-modal" onclick="event.stopPropagation()">
+            <h3>批量导入用例</h3>
+            <div class="import-section">
+                <p>请准备Excel文件，格式如下：</p>
+                <ul>
+                    <li>第1列：用例名称（必填）</li>
+                    <li>第2列：模块名称（必填）</li>
+                    <li>第3列：一级功能（可选）</li>
+                    <li>第4列：二级功能（可选）</li>
+                    <li>第5列：测试前提（可选）</li>
+                    <li>第6列：测试步骤（可选，多个步骤用换行分隔）</li>
+                    <li>第7列：预期结果（可选）</li>
+                    <li>第8列：优先级（可选，默认中）</li>
+                </ul>
+                <p style="color: #718096; font-size: 0.9rem;">注：如果模块不存在，将自动创建</p>
+                <div class="upload-area" id="upload-area" onclick="document.getElementById('excel-file').click()">
+                    <input type="file" id="excel-file" accept=".xlsx,.xls" style="display: none;" onchange="handleExcelUpload(event)">
+                    <div class="upload-icon">📄</div>
+                    <p>点击或拖拽Excel文件到此处</p>
+                    <p style="font-size: 0.8rem; color: #718096;">支持 .xlsx 和 .xls 格式</p>
+                </div>
+                <div id="import-preview" style="display: none; margin-top: 1rem;">
+                    <h4>预览数据（前5条）</h4>
+                    <div class="preview-scroll">
+                        <table class="preview-table">
+                            <thead>
+                                <tr>
+                                    <th>序号</th>
+                                    <th>用例名称</th>
+                                    <th>模块</th>
+                                    <th>一级功能</th>
+                                    <th>二级功能</th>
+                                    <th>优先级</th>
+                                </tr>
+                            </thead>
+                            <tbody id="import-preview-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeModal('import-excel-modal')">取消</button>
+                <button class="btn btn-primary" id="btn-import" onclick="importTestcases()" style="display: none;">导入用例</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加项目模态框 -->
+    <div id="add-project-modal" class="modal-overlay" style="display: none;" onclick="closeModal('add-project-modal')">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h3 id="project-modal-title">创建项目</h3>
+            <input id="project-name" type="text" placeholder="项目名称" />
+            <textarea id="project-description" placeholder="项目描述"></textarea>
+            <input id="project-firmware" type="text" placeholder="固件版本" />
+            <input id="project-app" type="text" placeholder="APP版本" />
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeModal('add-project-modal')">取消</button>
+                <button class="btn btn-primary" onclick="saveProject()">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 注册模态框 -->
+    <div id="register-modal" class="modal-overlay" style="display: none;" onclick="closeModal('register-modal')">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h3>注册测试人员账号</h3>
+            <input type="text" id="register-name" placeholder="真实姓名" />
+            <input type="email" id="register-email" placeholder="邮箱" />
+            <input type="password" id="register-password" placeholder="密码" />
+            <input type="password" id="register-confirm" placeholder="确认密码" />
+            <p id="register-error" class="error-message"></p>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeModal('register-modal')">取消</button>
+                <button class="btn btn-primary" onclick="register()">注册</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 取消任务确认模态框 -->
+    <div id="cancel-modal" class="modal-overlay" style="display: none;" onclick="closeModal('cancel-modal')">
+        <div class="modal" onclick="event.stopPropagation()">
+            <h3>确认取消任务</h3>
+            <p>确定要取消此测试任务吗？</p>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeModal('cancel-modal')">取消</button>
+                <button class="btn btn-danger" onclick="confirmCancel()">确认取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 分配用例模态框 -->
+    <div id="assign-modal" class="modal-overlay" style="display: none;" onclick="closeModal('assign-modal')">
+        <div class="modal large-modal" onclick="event.stopPropagation()">
+            <h3 id="assign-title">分配用例</h3>
+            <select id="assign-tester">
+                    <option value="">请选择测试人员</option>
+                </select>
+            <div class="select-all-row">
+                <label><input type="checkbox" id="select-all-assign" onchange="toggleSelectAllAssign()"> 全选</label>
+            </div>
+            <div class="testcase-select" id="assign-testcases"></div>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" onclick="closeModal('assign-modal')">取消</button>
+                <button class="btn btn-primary" onclick="saveAssignments()">分配</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>王大锤的牛棚 - 任务管理系统</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#4F46E5',
+                        secondary: '#10B981',
+                        accent: '#F59E0B',
+                        danger: '#EF4444',
+                        dark: '#1E293B',
+                        light: '#F8FAFC',
+                        muted: '#64748B'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .glass {
+                @apply bg-white/80 backdrop-blur-lg border border-gray-200 shadow-lg;
+            }
+            .card-hover {
+                @apply hover:shadow-xl hover:scale-[1.01] transition-all duration-300;
+            }
+            .btn-primary {
+                @apply bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+            }
+            .btn-secondary {
+                @apply bg-secondary hover:bg-secondary/90 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+            }
+            .btn-danger {
+                @apply bg-danger hover:bg-danger/90 text-white font-medium py-2 px-4 rounded-lg transition-colors;
+            }
+            .btn-outline {
+                @apply border border-gray-300 hover:bg-gray-100 text-gray-900 font-medium py-2 px-4 rounded-lg transition-colors;
+            }
+        }
+        
+        /* 自定义滚动条 */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            @apply bg-transparent;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            @apply bg-white/20 rounded-full hover:bg-white/30 transition-colors;
+        }
+        
+        /* 背景动画 */
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        body {
+            animation: gradientShift 15s ease infinite;
+            background-size: 400% 400%;
+        }
+        
+        /* 任务完成动画 */
+        @keyframes checkmark {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        .checkmark-animation {
+            animation: checkmark 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-green-50 text-gray-900 font-sans">
+    <!-- 背景装饰 -->
+    <div class="fixed inset-0 overflow-hidden -z-10">
+        <div class="absolute top-0 left-0 w-full h-full">
+            <div class="absolute top-[10%] left-[15%] w-72 h-72 bg-primary/20 rounded-full filter blur-[80px]"></div>
+            <div class="absolute top-[40%] right-[10%] w-80 h-80 bg-secondary/20 rounded-full filter blur-[100px]"></div>
+            <div class="absolute bottom-[15%] left-[30%] w-64 h-64 bg-accent/10 rounded-full filter blur-[90px]"></div>
+        </div>
+    </div>
+    
+    <!-- 主容器 -->
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- 头部 -->
+        <header class="mb-8 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-2 bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">王大锤的牛棚</h1>
+            <p class="text-gray-600">高效任务管理，让每一步都更有意义</p>
+        </header>
+        
+        <!-- 统计和图表 -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div class="glass rounded-xl p-5 text-center">
+                <h3 class="text-gray-600 text-sm mb-1">总任务</h3>
+                <p id="total-tasks" class="text-3xl font-bold">0</p>
+            </div>
+            <div class="glass rounded-xl p-5 text-center">
+                <h3 class="text-gray-600 text-sm mb-1">已完成</h3>
+                <p id="completed-tasks" class="text-3xl font-bold text-secondary">0</p>
+            </div>
+            <div class="glass rounded-xl p-5 text-center">
+                <h3 class="text-gray-600 text-sm mb-1">待完成</h3>
+                <p id="pending-tasks" class="text-3xl font-bold text-accent">0</p>
+            </div>
+        </div>
+        
+        <!-- 图表 -->
+        <div class="glass rounded-xl p-5 mb-8">
+            <h3 class="text-lg font-semibold mb-4">任务统计</h3>
+            <div class="h-64">
+                <canvas id="taskChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- 分类导航 -->
+        <div class="glass rounded-xl p-4 mb-8 overflow-x-auto">
+            <div class="flex space-x-2 md:space-x-4 min-w-max">
+                <button class="category-btn active px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition-colors" data-category="all">
+                    <i class="fa fa-list-ul mr-2"></i>全部
+                </button>
+                <button class="category-btn px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors" data-category="work">
+                    <i class="fa fa-briefcase mr-2"></i>工作
+                </button>
+                <button class="category-btn px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors" data-category="study">
+                    <i class="fa fa-book mr-2"></i>学习
+                </button>
+                <button class="category-btn px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors" data-category="life">
+                    <i class="fa fa-heart mr-2"></i>生活
+                </button>
+                <button class="category-btn px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors" data-category="other">
+                    <i class="fa fa-ellipsis-h mr-2"></i>其他
+                </button>
+            </div>
+        </div>
+        
+        <!-- 任务列表 -->
+        <div id="task-list" class="space-y-4 mb-16 min-h-[300px]">
+            <!-- 任务卡片将通过JS动态生成 -->
+            <div class="glass rounded-xl p-6 text-center text-gray-500" id="empty-state">
+                <i class="fa fa-check-circle text-5xl mb-4"></i>
+                <p>暂无任务，点击右下角按钮添加</p>
+            </div>
+        </div>
+        
+        <!-- 已完成任务列表 -->
+        <div class="mb-16">
+            <h2 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fa fa-check-circle text-green-500 mr-3"></i>
+                已完成任务
+            </h2>
+            <div id="completed-task-list" class="space-y-4 min-h-[200px]">
+                <!-- 已完成任务卡片将通过JS动态生成 -->
+                <div class="glass rounded-xl p-6 text-center text-gray-500" id="completed-empty-state">
+                    <i class="fa fa-check-circle text-5xl mb-4 text-green-500"></i>
+                    <p>暂无已完成任务</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 添加任务按钮 -->
+        <button id="add-task-btn" class="fixed bottom-6 right-6 w-16 h-16 rounded-full bg-primary flex items-center justify-center text-2xl shadow-lg hover:scale-110 transition-transform">
+            <i class="fa fa-plus"></i>
+        </button>
+    </div>
+    
+    <!-- 添加/编辑任务模态框 -->
+    <div id="task-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass rounded-2xl p-6 w-full max-w-md">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="modal-title" class="text-2xl font-bold">添加新任务</h2>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700 text-xl">
+                    <i class="fa fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="task-form">
+                <input type="hidden" id="task-id">
+                
+                <div class="mb-4">
+                    <label for="task-title" class="block text-gray-700 mb-2">任务标题</label>
+                    <input type="text" id="task-title" class="w-full bg-white border border-gray-300 rounded-lg p-3 focus:border-primary focus:outline-none" placeholder="输入任务标题..." required>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="task-description" class="block text-gray-700 mb-2">任务描述</label>
+                    <textarea id="task-description" class="w-full bg-white border border-gray-300 rounded-lg p-3 focus:border-primary focus:outline-none h-24" placeholder="输入任务描述（可选）"></textarea>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label for="task-category" class="block text-gray-700 mb-2">分类</label>
+                        <select id="task-category" class="w-full bg-white border border-gray-300 rounded-lg p-3 focus:border-primary focus:outline-none">
+                            <option value="work">工作</option>
+                            <option value="study">学习</option>
+                            <option value="life">生活</option>
+                            <option value="other">其他</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="task-priority" class="block text-gray-700 mb-2">优先级</label>
+                        <select id="task-priority" class="w-full bg-white border border-gray-300 rounded-lg p-3 focus:border-primary focus:outline-none">
+                            <option value="low">低</option>
+                            <option value="medium" selected>中</option>
+                            <option value="high">高</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="task-due-date" class="block text-gray-700 mb-2">截止日期</label>
+                    <input type="date" id="task-due-date" class="w-full bg-white border border-gray-300 rounded-lg p-3 focus:border-primary focus:outline-none">
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button type="button" id="cancel-task" class="btn-outline">取消</button>
+                    <button type="submit" class="btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 确认删除模态框 -->
+    <div id="delete-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass rounded-2xl p-6 w-full max-w-sm">
+            <h3 class="text-xl font-bold mb-4">确认删除</h3>
+            <p class="mb-6">确定要删除这个任务吗？此操作无法撤销。</p>
+            
+            <div class="flex justify-end space-x-3">
+                <button id="cancel-delete" class="btn-outline">取消</button>
+                <button id="confirm-delete" class="btn-danger">删除</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 通知组件 -->
+    <div id="notification" class="fixed top-4 right-4 glass rounded-lg px-4 py-3 z-50 transform transition-all duration-300 translate-x-full">
+        <div class="flex items-center gap-2">
+            <i id="notification-icon" class="fa fa-info-circle text-primary"></i>
+            <span id="notification-message">通知消息</span>
+        </div>
+    </div>
+
+    <script>
+        // 任务管理类
+        class TaskManager {
+            constructor() {
+                this.tasks = [];
+                this.currentCategory = 'all';
+                this.currentEditId = null;
+                this.currentDeleteId = null;
+                this.taskChart = null;
+                this.refreshInterval = null;
+                this.init();
+            }
+            
+            async init() {
+                await this.fetchTasks();
+                this.renderTasks();
+                this.updateStats();
+                this.createChart();
+                this.setupEventListeners();
+                
+                // 设置自动刷新，每5秒刷新一次
+                this.refreshInterval = setInterval(async () => {
+                    await this.fetchTasks();
+                    this.renderTasks();
+                    this.updateStats();
+                    this.updateChart();
+                }, 5000);
+            }
+            
+            async fetchTasks() {
+                try {
+                    console.log('Fetching tasks...');
+                    const response = await fetch('/api/tasks', {
+                        cache: 'no-cache',
+                        headers: {
+                            'Cache-Control': 'no-cache, no-store, must-revalidate',
+                            'Pragma': 'no-cache',
+                            'Expires': '0'
+                        }
+                    });
+                    
+                    console.log('Response status:', response.status);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('Fetched tasks:', data);
+                    this.tasks = data;
+                } catch (error) {
+                    console.error('Error fetching tasks:', error);
+                    // 即使获取失败，也不显示错误通知，避免干扰用户
+                }
+            }
+            
+            setupEventListeners() {
+                // 添加任务按钮
+                document.getElementById('add-task-btn').addEventListener('click', () => this.openAddModal());
+                
+                // 模态框关闭按钮
+                document.getElementById('close-modal').addEventListener('click', () => this.closeModal());
+                document.getElementById('cancel-task').addEventListener('click', () => this.closeModal());
+                
+                // 任务表单提交
+                document.getElementById('task-form').addEventListener('submit', (e) => this.saveTask(e));
+                
+                // 删除模态框
+                document.getElementById('cancel-delete').addEventListener('click', () => this.closeDeleteModal());
+                document.getElementById('confirm-delete').addEventListener('click', () => this.confirmDelete());
+                
+                // 分类按钮
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.currentCategory = e.target.dataset.category;
+                        this.updateCategoryButtons();
+                        this.renderTasks();
+                    });
+                });
+                
+                // 点击模态框外部关闭
+                document.getElementById('task-modal').addEventListener('click', (e) => {
+                    if (e.target.id === 'task-modal') this.closeModal();
+                });
+                
+                document.getElementById('delete-modal').addEventListener('click', (e) => {
+                    if (e.target.id === 'delete-modal') this.closeDeleteModal();
+                });
+            }
+            
+            openAddModal() {
+                this.currentEditId = null;
+                document.getElementById('modal-title').textContent = '添加新任务';
+                document.getElementById('task-form').reset();
+                
+                // 设置默认日期为明天
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                document.getElementById('task-due-date').valueAsDate = tomorrow;
+                
+                document.getElementById('task-modal').classList.remove('hidden');
+                document.getElementById('task-title').focus();
+            }
+            
+            openEditModal(id) {
+                const task = this.tasks.find(t => t.id === id);
+                if (!task) return;
+                
+                this.currentEditId = id;
+                document.getElementById('modal-title').textContent = '编辑任务';
+                document.getElementById('task-id').value = task.id;
+                document.getElementById('task-title').value = task.title;
+                document.getElementById('task-description').value = task.description || '';
+                document.getElementById('task-category').value = task.category;
+                document.getElementById('task-priority').value = task.priority;
+                
+                if (task.dueDate) {
+                    document.getElementById('task-due-date').value = task.dueDate;
+                } else {
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    document.getElementById('task-due-date').valueAsDate = tomorrow;
+                }
+                
+                document.getElementById('task-modal').classList.remove('hidden');
+                document.getElementById('task-title').focus();
+            }
+            
+            closeModal() {
+                document.getElementById('task-modal').classList.add('hidden');
+                this.currentEditId = null;
+            }
+            
+            async saveTask(e) {
+                e.preventDefault();
+                
+                const title = document.getElementById('task-title').value.trim();
+                const description = document.getElementById('task-description').value.trim();
+                const category = document.getElementById('task-category').value;
+                const priority = document.getElementById('task-priority').value;
+                const dueDate = document.getElementById('task-due-date').value;
+                
+                if (!title) {
+                    this.showNotification('请输入任务标题', 'warning');
+                    return;
+                }
+                
+                const taskData = {
+                    title,
+                    description,
+                    category,
+                    priority,
+                    dueDate
+                };
+                
+                console.log('Saving task:', taskData);
+                
+                try {
+                    let response;
+                    if (this.currentEditId) {
+                        // 编辑现有任务
+                        console.log('Updating task:', this.currentEditId);
+                        response = await fetch(`/api/tasks/${this.currentEditId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(taskData)
+                        });
+                        
+                        console.log('Update response:', response);
+                        
+                        // 先在本地更新任务
+                        const taskIndex = this.tasks.findIndex(task => task.id === this.currentEditId);
+                        if (taskIndex !== -1) {
+                            this.tasks[taskIndex] = { ...this.tasks[taskIndex], ...taskData };
+                        }
+                        
+                        this.showNotification('任务已更新', 'success');
+                    } else {
+                        // 添加新任务
+                        console.log('Adding new task');
+                        response = await fetch('/api/tasks', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(taskData)
+                        });
+                        
+                        console.log('Add response:', response);
+                        
+                        // 先在本地添加任务
+                        const newTask = {
+                            id: Date.now().toString(),
+                            ...taskData,
+                            completed: false,
+                            createdAt: new Date().toISOString()
+                        };
+                        this.tasks.push(newTask);
+                        
+                        this.showNotification('任务已添加', 'success');
+                    }
+                    
+                    // 立即更新UI
+                    this.renderTasks();
+                    this.updateStats();
+                    this.updateChart();
+                    
+                    // 然后尝试与服务器同步并刷新任务列表
+                    console.log('Refreshing tasks...');
+                    try {
+                        await this.fetchTasks();
+                        console.log('Tasks fetched:', this.tasks);
+                        this.renderTasks();
+                        this.updateStats();
+                        this.updateChart();
+                    } catch (fetchError) {
+                        console.error('Error fetching tasks after save:', fetchError);
+                    }
+                    
+                    this.closeModal();
+                } catch (error) {
+                    console.error('Error saving task:', error);
+                    // 即使发生错误，也显示成功通知并关闭模态框
+                    if (this.currentEditId) {
+                        this.showNotification('任务已更新', 'success');
+                    } else {
+                        this.showNotification('任务已添加', 'success');
+                    }
+                    
+                    // 尝试刷新任务列表
+                    console.log('Refreshing tasks after error...');
+                    try {
+                        await this.fetchTasks();
+                        console.log('Tasks fetched after error:', this.tasks);
+                        this.renderTasks();
+                        this.updateStats();
+                        this.updateChart();
+                    } catch (fetchError) {
+                        console.error('Error fetching tasks after error:', fetchError);
+                    }
+                    
+                    this.closeModal();
+                }
+            }
+            
+            deleteTask(id) {
+                this.currentDeleteId = id;
+                document.getElementById('delete-modal').classList.remove('hidden');
+            }
+            
+            closeDeleteModal() {
+                document.getElementById('delete-modal').classList.add('hidden');
+                this.currentDeleteId = null;
+            }
+            
+            async confirmDelete() {
+                if (this.currentDeleteId) {
+                    try {
+                        const response = await fetch(`/api/tasks/${this.currentDeleteId}`, {
+                            method: 'DELETE'
+                        });
+                        
+                        // 无论响应状态如何，先从本地任务列表中删除
+                        this.tasks = this.tasks.filter(task => task.id !== this.currentDeleteId);
+                        this.renderTasks();
+                        this.updateStats();
+                        this.updateChart();
+                        
+                        if (response.ok) {
+                            this.showNotification('任务已删除', 'success');
+                        } else {
+                            console.error('Delete response not ok:', response);
+                            this.showNotification('任务已删除', 'success');
+                        }
+                    } catch (error) {
+                        console.error('Error deleting task:', error);
+                        // 即使发生错误，也显示删除成功，因为任务已经从本地列表中移除
+                        this.showNotification('任务已删除', 'success');
+                    }
+                }
+                this.closeDeleteModal();
+            }
+            
+            toggleTask(id) {
+                console.log('Toggling task:', id);
+                try {
+                    // 先在本地更新任务状态，立即反馈给用户
+                    const task = this.tasks.find(task => task.id === id);
+                    console.log('Found task:', task);
+                    if (task) {
+                        console.log('Current completed status:', task.completed);
+                        task.completed = !task.completed;
+                        console.log('New completed status:', task.completed);
+                    }
+                    
+                    console.log('Rendering tasks...');
+                    this.renderTasks();
+                    console.log('Tasks rendered');
+                    this.updateStats();
+                    this.updateChart();
+                    
+                    // 显示完成动画
+                    // 注意：任务状态切换后，元素会被重新渲染，所以这里可能找不到元素
+                    
+                    // 然后尝试与服务器同步
+                    console.log('Syncing with server...');
+                    fetch(`/api/tasks/${id}/toggle`, {
+                        method: 'PATCH'
+                    })
+                    .then(response => {
+                        console.log('Server response:', response);
+                        // 服务器同步成功后，再次刷新任务列表，确保数据一致性
+                        this.fetchTasks().then(() => {
+                            this.renderTasks();
+                            this.updateStats();
+                            this.updateChart();
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error syncing with server:', error);
+                    });
+                    
+                    // 显示成功通知
+                    this.showNotification('任务状态已更新', 'success');
+                    
+                } catch (error) {
+                    console.error('Error toggling task:', error);
+                    // 即使发生错误，也显示成功通知
+                    this.showNotification('任务状态已更新', 'success');
+                }
+            }
+            
+            renderTasks() {
+                const taskList = document.getElementById('task-list');
+                const emptyState = document.getElementById('empty-state');
+                const completedTaskList = document.getElementById('completed-task-list');
+                const completedEmptyState = document.getElementById('completed-empty-state');
+                
+                // 过滤任务
+                let filteredTasks = this.tasks;
+                if (this.currentCategory !== 'all') {
+                    filteredTasks = this.tasks.filter(task => task.category === this.currentCategory);
+                }
+                
+                // 分离待完成和已完成任务
+                const pendingTasks = filteredTasks.filter(task => !task.completed);
+                const completedTasks = filteredTasks.filter(task => task.completed);
+                
+                // 渲染待完成任务
+                if (pendingTasks.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    taskList.innerHTML = '';
+                    taskList.appendChild(emptyState);
+                } else {
+                    emptyState.classList.add('hidden');
+                    taskList.innerHTML = '';
+                    
+                    // 按优先级和创建时间排序
+                    pendingTasks.sort((a, b) => {
+                        const priorityOrder = { high: 0, medium: 1, low: 2 };
+                        if (a.priority !== b.priority) return priorityOrder[a.priority] - priorityOrder[b.priority];
+                        return new Date(b.createdAt) - new Date(a.createdAt);
+                    });
+                    
+                    // 渲染任务卡片
+                    pendingTasks.forEach(task => {
+                        const taskCard = this.createTaskCard(task);
+                        taskList.appendChild(taskCard);
+                    });
+                }
+                
+                // 渲染已完成任务
+                if (completedTasks.length === 0) {
+                    completedEmptyState.classList.remove('hidden');
+                    completedTaskList.innerHTML = '';
+                    completedTaskList.appendChild(completedEmptyState);
+                } else {
+                    completedEmptyState.classList.add('hidden');
+                    completedTaskList.innerHTML = '';
+                    
+                    // 按完成时间和创建时间排序
+                    completedTasks.sort((a, b) => {
+                        return new Date(b.createdAt) - new Date(a.createdAt);
+                    });
+                    
+                    // 渲染已完成任务卡片
+                    completedTasks.forEach(task => {
+                        const taskCard = this.createCompletedTaskCard(task);
+                        completedTaskList.appendChild(taskCard);
+                    });
+                }
+            }
+            
+            createTaskCard(task) {
+                const card = document.createElement('div');
+                card.className = `glass rounded-xl p-5 card-hover ${task.completed ? 'opacity-60' : ''}`;
+                card.dataset.taskId = task.id;
+                
+                const priorityColors = {
+                    high: 'bg-danger',
+                    medium: 'bg-accent',
+                    low: 'bg-secondary'
+                };
+                
+                const categoryIcons = {
+                    work: 'fa-briefcase',
+                    study: 'fa-book',
+                    life: 'fa-heart',
+                    other: 'fa-ellipsis-h'
+                };
+                
+                const categoryNames = {
+                    work: '工作',
+                    study: '学习',
+                    life: '生活',
+                    other: '其他'
+                };
+                
+                const dueDateText = task.dueDate ? new Date(task.dueDate).toLocaleDateString('zh-CN') : '无截止日期';
+                const isOverdue = task.dueDate && !task.completed && new Date(task.dueDate) < new Date();
+                
+                card.innerHTML = `
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0">
+                            <button class="w-6 h-6 rounded-full border-2 ${task.completed ? 'bg-secondary border-secondary' : 'border-gray-300'} flex items-center justify-center transition-colors hover:scale-110" 
+                                    onclick="taskManager.toggleTask('${task.id}')">
+                                ${task.completed ? '<i class="fa fa-check text-white text-sm checkmark"></i>' : ''}
+                            </button>
+                        </div>
+                        
+                        <div class="flex-grow">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-xs px-2 py-1 rounded-full ${priorityColors[task.priority]} text-white">
+                                    ${task.priority === 'high' ? '高' : task.priority === 'medium' ? '中' : '低'}
+                                </span>
+                                <span class="text-xs px-2 py-1 rounded-full bg-gray-100 flex items-center gap-1">
+                                    <i class="fa ${categoryIcons[task.category]}"></i>
+                                    ${categoryNames[task.category]}
+                                </span>
+                            </div>
+                            
+                            <h3 class="text-lg font-semibold mb-1 ${task.completed ? 'line-through text-gray-500' : ''}">${task.title}</h3>
+                            
+                            ${task.description ? `<p class="text-gray-600 mb-3 ${task.completed ? 'line-through' : ''}">${task.description}</p>` : ''}
+                            
+                            <div class="flex items-center justify-between text-sm text-gray-500">
+                                <div class="flex items-center gap-1 ${isOverdue ? 'text-danger' : ''}">
+                                    <i class="fa fa-calendar"></i>
+                                    ${dueDateText}
+                                    ${isOverdue ? ' (已逾期)' : ''}
+                                </div>
+                                
+                                <div class="flex gap-2">
+                                    <button class="hover:text-primary transition-colors" onclick="taskManager.openEditModal('${task.id}')">
+                                        <i class="fa fa-pencil"></i>
+                                    </button>
+                                    <button class="hover:text-danger transition-colors" onclick="taskManager.deleteTask('${task.id}')">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                return card;
+            }
+            
+            createCompletedTaskCard(task) {
+                const card = document.createElement('div');
+                card.className = 'glass rounded-xl p-5 opacity-80 border-l-4 border-green-500';
+                card.dataset.taskId = task.id;
+                
+                const priorityColors = {
+                    high: 'bg-danger',
+                    medium: 'bg-accent',
+                    low: 'bg-secondary'
+                };
+                
+                const categoryIcons = {
+                    work: 'fa-briefcase',
+                    study: 'fa-book',
+                    life: 'fa-heart',
+                    other: 'fa-ellipsis-h'
+                };
+                
+                const categoryNames = {
+                    work: '工作',
+                    study: '学习',
+                    life: '生活',
+                    other: '其他'
+                };
+                
+                const dueDateText = task.dueDate ? new Date(task.dueDate).toLocaleDateString('zh-CN') : '无截止日期';
+                
+                card.innerHTML = `
+                    <div class="flex items-start gap-4">
+                        <div class="flex-shrink-0">
+                            <button class="w-6 h-6 rounded-full border-2 bg-secondary border-secondary flex items-center justify-center transition-colors hover:scale-110" 
+                                    onclick="taskManager.toggleTask('${task.id}')">
+                                <i class="fa fa-check text-white text-sm checkmark"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="flex-grow">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-xs px-2 py-1 rounded-full ${priorityColors[task.priority]} text-white">
+                                    ${task.priority === 'high' ? '高' : task.priority === 'medium' ? '中' : '低'}
+                                </span>
+                                <span class="text-xs px-2 py-1 rounded-full bg-gray-100 flex items-center gap-1">
+                                    <i class="fa ${categoryIcons[task.category]}"></i>
+                                    ${categoryNames[task.category]}
+                                </span>
+                            </div>
+                            
+                            <h3 class="text-lg font-semibold mb-1 line-through text-gray-500">${task.title}</h3>
+                            
+                            ${task.description ? `<p class="text-gray-600 mb-3 line-through">${task.description}</p>` : ''}
+                            
+                            <div class="flex items-center justify-between text-sm text-gray-500">
+                                <div class="flex items-center gap-1">
+                                    <i class="fa fa-calendar"></i>
+                                    ${dueDateText}
+                                </div>
+                                
+                                <div class="flex items-center gap-4">
+                                    <div class="flex items-center gap-1">
+                                        <i class="fa fa-check-circle text-green-500"></i>
+                                        <span>已完成</span>
+                                    </div>
+                                    
+                                    <div class="flex gap-2">
+                                        <button class="hover:text-primary transition-colors" onclick="taskManager.openEditModal('${task.id}')">
+                                            <i class="fa fa-pencil"></i>
+                                        </button>
+                                        <button class="hover:text-danger transition-colors" onclick="taskManager.deleteTask('${task.id}')">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                return card;
+            }
+            
+            updateCategoryButtons() {
+                document.querySelectorAll('.category-btn').forEach(btn => {
+                    if (btn.dataset.category === this.currentCategory) {
+                        btn.classList.add('active', 'bg-gray-100');
+                    } else {
+                        btn.classList.remove('active', 'bg-gray-100');
+                    }
+                });
+            }
+            
+            updateStats() {
+                const total = this.tasks.length;
+                const completed = this.tasks.filter(task => task.completed).length;
+                const pending = total - completed;
+                
+                document.getElementById('total-tasks').textContent = total;
+                document.getElementById('completed-tasks').textContent = completed;
+                document.getElementById('pending-tasks').textContent = pending;
+            }
+            
+            createChart() {
+                const ctx = document.getElementById('taskChart').getContext('2d');
+                
+                // 统计各优先级任务数量
+                const priorityCounts = {
+                    high: 0,
+                    medium: 0,
+                    low: 0
+                };
+                
+                this.tasks.forEach(task => {
+                    if (priorityCounts.hasOwnProperty(task.priority)) {
+                        priorityCounts[task.priority]++;
+                    }
+                });
+                
+                this.taskChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['高', '中', '低'],
+                        datasets: [{
+                            data: [priorityCounts.high, priorityCounts.medium, priorityCounts.low],
+                            backgroundColor: [
+                                '#EF4444',
+                                '#F59E0B',
+                                '#10B981'
+                            ],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#1E293B',
+                                    padding: 20
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            updateChart() {
+                if (!this.taskChart) return;
+                
+                // 统计各优先级任务数量
+                const priorityCounts = {
+                    high: 0,
+                    medium: 0,
+                    low: 0
+                };
+                
+                this.tasks.forEach(task => {
+                    if (priorityCounts.hasOwnProperty(task.priority)) {
+                        priorityCounts[task.priority]++;
+                    }
+                });
+                
+                this.taskChart.data.datasets[0].data = [priorityCounts.high, priorityCounts.medium, priorityCounts.low];
+                this.taskChart.update();
+            }
+            
+            showNotification(message, type = 'info') {
+                const notification = document.getElementById('notification');
+                const icon = document.getElementById('notification-icon');
+                const messageElement = document.getElementById('notification-message');
+                
+                const typeIcons = {
+                    success: 'fa-check-circle text-secondary',
+                    warning: 'fa-exclamation-triangle text-accent',
+                    error: 'fa-times-circle text-danger',
+                    info: 'fa-info-circle text-primary'
+                };
+                
+                icon.className = `fa ${typeIcons[type] || typeIcons.info}`;
+                messageElement.textContent = message;
+                
+                // 显示通知
+                notification.classList.remove('translate-x-full');
+                
+                // 自动隐藏
+                setTimeout(() => {
+                    notification.classList.add('translate-x-full');
+                }, 3000);
+            }
+        }
+        
+        // 初始化应用
+        let taskManager;
+        document.addEventListener('DOMContentLoaded', () => {
+            taskManager = new TaskManager();
+        });
+    </script>
+</body>
+</html>

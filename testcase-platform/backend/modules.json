@@ -1,0 +1,12 @@
+[
+  {
+    "id": "1",
+    "name": "feature complete",
+    "description": "此阶段要求所有的基础功能全部开发完成，并验收通过"
+  },
+  {
+    "id": "2",
+    "name": "蓝牙",
+    "description": "1"
+  }
+]

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Status Update Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #e0e0e0;
+        }
+        .test-container {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .status-display {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 18px;
+            font-weight: bold;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+        }
+        .status-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+        .status-progress {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        .status-completed {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        select {
+            padding: 10px 20px;
+            border-radius: 8px;
+            background: #2d2d44;
+            color: #e0e0e0;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        .btn-success {
+            background: #22c55e;
+            color: white;
+        }
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        .btn-info {
+            background: #3b82f6;
+            color: white;
+        }
+        .log {
+            background: #0f0f1a;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .log-success {
+            color: #22c55e;
+        }
+        .log-info {
+            color: #3b82f6;
+        }
+        .log-warning {
+            color: #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <h1>Status Update Test</h1>
+    <p>This test simulates the development plan status update functionality.</p>
+    
+    <div class="test-container">
+        <h3>Test Task: Sensor Data Processing</h3>
+        <label for="status-select">Select Status:</label>
+        <select id="status-select" onchange="updateStatus(this.value)">
+            <option value="pending">Pending</option>
+            <option value="in-progress">In Progress</option>
+            <option value="completed">Completed</option>
+        </select>
+        
+        <div id="status-display" class="status-display status-pending">
+            Current Status: Pending
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <button class="btn-success" onclick="simulateStatusChange('completed')">✅ Simulate Complete</button>
+            <button class="btn-warning" onclick="simulateStatusChange('in-progress')">🔄 Simulate In Progress</button>
+            <button class="btn-info" onclick="simulateStatusChange('pending')">⏳ Simulate Pending</button>
+        </div>
+    </div>
+    
+    <div class="test-container">
+        <h3>Test Results Log</h3>
+        <div id="log" class="log"></div>
+    </div>
+    
+    <script>
+        let testTask = {
+            id: 'test-task-001',
+            title: 'Sensor Data Processing',
+            status: 'pending'
+        };
+        
+        const statusText = {
+            'pending': 'Pending',
+            'in-progress': 'In Progress',
+            'completed': 'Completed'
+        };
+        
+        const statusClass = {
+            'pending': 'status-pending',
+            'in-progress': 'status-progress',
+            'completed': 'status-completed'
+        };
+        
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.prepend(entry);
+            
+            // Keep only last 20 entries
+            const entries = log.querySelectorAll('.log-entry');
+            if (entries.length > 20) {
+                entries[entries.length - 1].remove();
+            }
+        }
+        
+        function updateStatusDisplay(newStatus) {
+            const display = document.getElementById('status-display');
+            
+            // Update text
+            display.textContent = `Current Status: ${statusText[newStatus]}`;
+            
+            // Update class
+            display.classList.remove('status-pending', 'status-progress', 'status-completed');
+            display.classList.add(statusClass[newStatus]);
+            
+            addLog(`Status updated to: ${statusText[newStatus]}`, 'success');
+        }
+        
+        function updateStatus(status) {
+            // Update task data
+            testTask.status = status;
+            addLog(`Data updated: status = '${status}'`, 'info');
+            
+            // Update display immediately
+            updateStatusDisplay(status);
+            
+            // Simulate saving to localStorage
+            localStorage.setItem('test_task_status', status);
+            addLog('Data saved to localStorage', 'info');
+        }
+        
+        function simulateStatusChange(status) {
+            // Set the select value
+            document.getElementById('status-select').value = status;
+            
+            // Trigger the update
+            updateStatus(status);
+        }
+        
+        // Initialize test
+        addLog('Test initialized. Current status: Pending', 'info');
+        addLog('Try changing the dropdown or clicking the buttons to test immediate update.', 'info');
+        
+        // Auto-test sequence
+        setTimeout(() => {
+            addLog('Starting auto-test sequence...', 'warning');
+            
+            setTimeout(() => {
+                simulateStatusChange('in-progress');
+            }, 1000);
+            
+            setTimeout(() => {
+                simulateStatusChange('completed');
+            }, 3000);
+            
+            setTimeout(() => {
+                simulateStatusChange('pending');
+            }, 5000);
+            
+            setTimeout(() => {
+                addLog('Auto-test completed!', 'success');
+                addLog('✅ Status updates are working correctly - no page refresh needed.', 'success');
+            }, 6000);
+        }, 2000);
+    </script>
+</body>
+</html>

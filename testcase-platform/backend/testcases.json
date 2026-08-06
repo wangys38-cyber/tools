@@ -1,0 +1,35 @@
+[
+  {
+    "id": "1",
+    "module_id": "1",
+    "title": "OTA",
+    "description": "用户可以通过APP配对手表进行OTA升级",
+    "steps": [
+      "用户已配对",
+      "在APP端点击固件更新",
+      "检测到可升级的版本",
+      "进行升级"
+    ],
+    "expected_result": "升级成功",
+    "status": "in_progress",
+    "assignee": "周雯",
+    "project_id": null,
+    "firmware_version": "",
+    "app_version": ""
+  },
+  {
+    "id": "2",
+    "module_id": "1",
+    "title": "女性健康",
+    "description": "用户输入经期时间",
+    "steps": [
+      "用户可在表端和APP端同时标记经期时间"
+    ],
+    "expected_result": "功能正常可用",
+    "status": "in_progress",
+    "assignee": "周雯",
+    "project_id": null,
+    "firmware_version": "",
+    "app_version": ""
+  }
+]

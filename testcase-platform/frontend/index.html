@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用例管理平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部导航栏 -->
+        <header class="header">
+            <h1 class="logo">Moto Test Management</h1>
+            <nav class="nav">
+                <a href="#testcases" class="nav-item active">用例管理</a>
+                <a href="#modules" class="nav-item">模块管理</a>
+                <a href="#testcase-library" class="nav-item">用例库</a>
+                <a href="#projects" class="nav-item">项目管理</a>
+                <a href="#dashboard" class="nav-item">测试进度</a>
+            </nav>
+        </header>
+
+        <!-- 主内容区域 -->
+        <main class="main">
+            <!-- 用例管理区域 -->
+            <section id="testcases" class="section active">
+                <div class="section-header">
+                    <h2>用例管理</h2>
+                    <div class="section-actions">
+                        <button id="add-testcase-btn" class="btn primary">
+                            <i class="fas fa-plus"></i> 添加用例
+                        </button>
+                        <button id="assign-testcases-btn" class="btn secondary">
+                            <i class="fas fa-user-plus"></i> 下发用例
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 模块选择 -->
+                <div class="module-selector">
+                    <label for="module-filter">按模块筛选:</label>
+                    <select id="module-filter" class="select">
+                        <option value="all">所有模块</option>
+                    </select>
+                </div>
+
+                <!-- 用例列表 -->
+                <div class="testcase-list">
+                    <div class="testcase-list-header">
+                        <div class="checkbox-column">
+                            <input type="checkbox" id="select-all">
+                        </div>
+                        <div class="id-column">ID</div>
+                        <div class="title-column">用例标题</div>
+                        <div class="module-column">模块</div>
+                        <div class="status-column">状态</div>
+                        <div class="assignee-column">负责人</div>
+                        <div class="actions-column">操作</div>
+                    </div>
+                    <div id="testcase-items" class="testcase-items">
+                        <!-- 用例项将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 模块管理区域 -->
+            <section id="modules" class="section admin-only">
+                <div class="section-header">
+                    <h2>模块管理</h2>
+                    <button id="add-module-btn" class="btn primary admin-only">
+                        <i class="fas fa-plus"></i> 添加模块
+                    </button>
+                </div>
+
+                <!-- 模块列表 -->
+                <div class="module-list">
+                    <div class="module-list-header">
+                        <div class="id-column">ID</div>
+                        <div class="name-column">模块名称</div>
+                        <div class="description-column">描述</div>
+                        <div class="actions-column">操作</div>
+                    </div>
+                    <div id="module-items" class="module-items">
+                        <!-- 模块项将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 用例库管理区域 -->
+            <section id="testcase-library" class="section admin-only">
+                <div class="section-header">
+                    <h2>用例库</h2>
+                    <button id="add-testcase-library-btn" class="btn primary admin-only">
+                        <i class="fas fa-plus"></i> 添加用例库
+                    </button>
+                </div>
+
+                <!-- 用例库列表 -->
+                <div class="testcase-library-list">
+                    <div class="testcase-library-list-header">
+                        <div class="id-column">ID</div>
+                        <div class="title-column">用例名称</div>
+                        <div class="module-column">所属模块</div>
+                        <div class="description-column">描述</div>
+                        <div class="actions-column">操作</div>
+                    </div>
+                    <div id="testcase-library-items" class="testcase-library-items">
+                        <!-- 用例库项将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 项目管理区域 -->
+            <section id="projects" class="section admin-only">
+                <div class="section-header">
+                    <h2>项目管理</h2>
+                    <button id="add-project-btn" class="btn primary admin-only">
+                        <i class="fas fa-plus"></i> 添加项目
+                    </button>
+                </div>
+
+                <!-- 项目列表 -->
+                <div class="project-list">
+                    <div class="project-list-header">
+                        <div class="id-column">ID</div>
+                        <div class="name-column">项目名称</div>
+                        <div class="description-column">描述</div>
+                        <div class="actions-column">操作</div>
+                    </div>
+                    <div id="project-items" class="project-items">
+                        <!-- 项目项将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 测试进度区域 -->
+            <section id="dashboard" class="section">
+                <div class="section-header">
+                    <h2>测试进度</h2>
+                </div>
+
+                <!-- 总体进度 -->
+                <div class="overall-progress">
+                    <h3>总体进度</h3>
+                    <div class="progress-card">
+                        <div class="progress-stats">
+                            <div class="stat-item">
+                                <span class="stat-value" id="total-testcases">0</span>
+                                <span class="stat-label">总用例</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value passed" id="passed-testcases">0</span>
+                                <span class="stat-label">通过</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value failed" id="failed-testcases">0</span>
+                                <span class="stat-label">失败</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value in-progress" id="in-progress-testcases">0</span>
+                                <span class="stat-label">进行中</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value pending" id="pending-testcases">0</span>
+                                <span class="stat-label">待测试</span>
+                            </div>
+                        </div>
+                        <div class="progress-chart">
+                            <canvas id="overall-chart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 模块进度 -->
+                <div class="module-progress">
+                    <h3>模块进度</h3>
+                    <div id="module-progress-cards" class="progress-cards">
+                        <!-- 模块进度卡片将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 添加用例模态框 -->
+    <div id="add-testcase-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加用例</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="add-testcase-form">
+                <div class="form-group">
+                    <label for="testcase-module">模块</label>
+                    <select id="testcase-module" class="select" required>
+                        <option value="">请选择模块</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="testcase-title">用例标题</label>
+                    <input type="text" id="testcase-title" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label for="testcase-description">用例描述</label>
+                    <textarea id="testcase-description" class="textarea"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="testcase-steps">测试步骤</label>
+                    <textarea id="testcase-steps" class="textarea" placeholder="每行一个步骤"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="testcase-expected-result">预期结果</label>
+                    <textarea id="testcase-expected-result" class="textarea"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn secondary close-modal">取消</button>
+                    <button type="submit" class="btn primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 添加模块模态框 -->
+    <div id="add-module-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加模块</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="add-module-form">
+                <div class="form-group">
+                    <label for="module-name">模块名称</label>
+                    <input type="text" id="module-name" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label for="module-description">模块描述</label>
+                    <textarea id="module-description" class="textarea"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn secondary close-modal">取消</button>
+                    <button type="submit" class="btn primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 添加项目模态框 -->
+    <div id="add-project-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加项目</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="add-project-form">
+                <div class="form-group">
+                    <label for="project-name">项目名称</label>
+                    <input type="text" id="project-name" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label for="project-description">项目描述</label>
+                    <textarea id="project-description" class="textarea"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn secondary close-modal">取消</button>
+                    <button type="submit" class="btn primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 添加用例库模态框 -->
+    <div id="add-testcase-library-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加用例库</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="add-testcase-library-form">
+                <div class="form-group">
+                    <label for="testcase-library-module">所属模块</label>
+                    <select id="testcase-library-module" class="select" required>
+                        <option value="">请选择模块</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="testcase-library-title">用例名称</label>
+                    <input type="text" id="testcase-library-title" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label for="testcase-library-description">用例描述</label>
+                    <textarea id="testcase-library-description" class="textarea"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="testcase-library-steps">测试步骤</label>
+                    <textarea id="testcase-library-steps" class="textarea" placeholder="请输入测试步骤，每行一个步骤"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="testcase-library-expected-result">预期结果</label>
+                    <textarea id="testcase-library-expected-result" class="textarea"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn secondary close-modal">取消</button>
+                    <button type="submit" class="btn primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑用例模态框 -->
+    <div id="edit-testcase-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑用例</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="edit-testcase-form">
+                <input type="hidden" id="edit-testcase-id">
+                <div class="form-group">
+                    <label for="edit-testcase-module">所属模块</label>
+                    <select id="edit-testcase-module" class="select" required>
+                        <option value="">请选择模块</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-testcase-title">用例名称</label>
+                    <input type="text" id="edit-testcase-title" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-testcase-description">用例描述</label>
+                    <textarea id="edit-testcase-description" class="textarea"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-testcase-steps">测试步骤</label>
+                    <textarea id="edit-testcase-steps" class="textarea" placeholder="请输入测试步骤，每行一个步骤"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-testcase-expected-result">预期结果</label>
+                    <textarea id="edit-testcase-expected-result" class="textarea"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-testcase-assignee">负责人</label>
+                    <input type="text" id="edit-testcase-assignee" class="input">
+                </div>
+                <div class="form-group">
+                    <label for="edit-testcase-project">项目</label>
+                    <input type="text" id="edit-testcase-project" class="input">
+                </div>
+                <div class="form-group">
+                    <label for="edit-testcase-firmware-version">固件版本</label>
+                    <input type="text" id="edit-testcase-firmware-version" class="input">
+                </div>
+                <div class="form-group">
+                    <label for="edit-testcase-app-version">APP版本</label>
+                    <input type="text" id="edit-testcase-app-version" class="input">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn secondary close-modal">取消</button>
+                    <button type="submit" class="btn primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑模块模态框 -->
+    <div id="edit-module-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑模块</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="edit-module-form">
+                <input type="hidden" id="edit-module-id">
+                <div class="form-group">
+                    <label for="edit-module-name">模块名称</label>
+                    <input type="text" id="edit-module-name" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-module-description">模块描述</label>
+                    <textarea id="edit-module-description" class="textarea"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn secondary close-modal">取消</button>
+                    <button type="submit" class="btn primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑项目模态框 -->
+    <div id="edit-project-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑项目</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="edit-project-form">
+                <input type="hidden" id="edit-project-id">
+                <div class="form-group">
+                    <label for="edit-project-name">项目名称</label>
+                    <input type="text" id="edit-project-name" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-project-description">项目描述</label>
+                    <textarea id="edit-project-description" class="textarea"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn secondary close-modal">取消</button>
+                    <button type="submit" class="btn primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑用例库模态框 -->
+    <div id="edit-testcase-library-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑用例库</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="edit-testcase-library-form">
+                <input type="hidden" id="edit-testcase-library-id">
+                <div class="form-group">
+                    <label for="edit-testcase-library-module">所属模块</label>
+                    <select id="edit-testcase-library-module" class="select" required>
+                        <option value="">请选择模块</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-testcase-library-title">用例名称</label>
+                    <input type="text" id="edit-testcase-library-title" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-testcase-library-description">用例描述</label>
+                    <textarea id="edit-testcase-library-description" class="textarea"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-testcase-library-steps">测试步骤</label>
+                    <textarea id="edit-testcase-library-steps" class="textarea" placeholder="请输入测试步骤，每行一个步骤"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-testcase-library-expected-result">预期结果</label>
+                    <textarea id="edit-testcase-library-expected-result" class="textarea"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn secondary close-modal">取消</button>
+                    <button type="submit" class="btn primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 下发用例模态框 -->
+    <div id="assign-testcases-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>下发用例</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="assign-testcases-form">
+                <div class="form-group">
+                    <label for="project-select">项目</label>
+                    <select id="project-select" class="select" required>
+                        <option value="">请选择项目</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="firmware-version">固件版本</label>
+                    <input type="text" id="firmware-version" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label for="app-version">APP版本</label>
+                    <input type="text" id="app-version" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label for="assignee">负责人</label>
+                    <input type="text" id="assignee" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label>选中的用例</label>
+                    <div id="selected-testcases" class="selected-testcases">
+                        <!-- 选中的用例将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn secondary close-modal">取消</button>
+                    <button type="submit" class="btn primary">下发</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 通知组件 -->
+    <div id="notification" class="notification">
+        <span id="notification-message"></span>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

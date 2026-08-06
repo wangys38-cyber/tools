@@ -1,0 +1,127 @@
+<view class="container">
+  <view class="task-header-card" wx:if="{{task}}">
+    <view class="task-status-bar">
+      <view class="status-badge {{'status-' + task.status}}">
+        {{getStatusText(task.status)}}
+      </view>
+      <view class="task-date">{{task.createdAt}}</view>
+    </view>
+    
+    <view class="task-title">{{task.title}}</view>
+    
+    <view class="task-meta-row">
+      <view class="meta-card">
+        <view class="meta-icon">👤</view>
+        <view class="meta-content">
+          <view class="meta-label">测试人员</view>
+          <view class="meta-value">{{task.assignee}}</view>
+        </view>
+      </view>
+      <view class="meta-card">
+        <view class="meta-icon">📅</view>
+        <view class="meta-content">
+          <view class="meta-label">预估天数</view>
+          <view class="meta-value">{{task.estimatedDays}}天</view>
+        </view>
+      </view>
+    </view>
+
+    <view class="task-desc">
+      <view class="desc-label">任务描述</view>
+      <view class="desc-content">{{task.description || '暂无描述'}}</view>
+    </view>
+  </view>
+
+  <view class="progress-section" wx:if="{{task}}">
+    <view class="section-title">测试进度</view>
+    
+    <view class="progress-overview">
+      <view class="progress-circle">
+        <view class="progress-ring">
+          <view class="progress-inner">
+            <view class="progress-number">{{task.progress}}%</view>
+            <view class="progress-label">完成度</view>
+          </view>
+        </view>
+        <svg class="progress-svg" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="45" fill="none" stroke="#f0f0f0" stroke-width="8"/>
+          <circle 
+            cx="50" cy="50" r="45" fill="none" 
+            stroke="url(#progressGradient)" 
+            stroke-width="8"
+            stroke-linecap="round"
+            stroke-dasharray="{{2 * Math.PI * 45}}"
+            stroke-dashoffset="{{2 * Math.PI * 45 * (1 - task.progress / 100)}}"
+            transform="rotate(-90 50 50)"/>
+          <defs>
+            <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#6366f1"/>
+              <stop offset="100%" stop-color="#8b5cf6"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </view>
+    </view>
+
+    <view class="progress-history" wx:if="{{task.progressHistory.length > 0}}">
+      <view class="history-title">进度记录</view>
+      <view class="history-list">
+        <view wx:for="{{task.progressHistory}}" wx:key="index" class="history-item">
+          <view class="history-date">{{item.date}}</view>
+          <view class="history-progress">
+            <view class="mini-progress-bar">
+              <view class="mini-progress-fill" style="width: {{item.progress}}%"></view>
+            </view>
+            <text>{{item.progress}}%</text>
+          </view>
+          <view class="history-remark">{{item.remark}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="action-section" wx:if="{{task}}">
+    <view class="section-title">操作</view>
+    
+    <view class="action-list">
+      <view 
+        class="action-item start-btn" 
+        wx:if="{{task.status === 'pending'}}"
+        bindtap="startTest"
+      >
+        <view class="action-icon">▶️</view>
+        <view class="action-content">
+          <view class="action-title">开始测试</view>
+          <view class="action-desc">记录测试开始时间</view>
+        </view>
+        <view class="action-arrow">→</view>
+      </view>
+
+      <view 
+        class="action-item progress-btn" 
+        wx:if="{{task.status === 'in_progress'}}"
+        bindtap="goToProgress"
+      >
+        <view class="action-icon">📊</view>
+        <view class="action-content">
+          <view class="action-title">更新进度</view>
+          <view class="action-desc">填写今日测试进度</view>
+        </view>
+        <view class="action-arrow">→</view>
+      </view>
+
+      <view 
+        class="action-item complete-btn" 
+        wx:if="{{task.status === 'in_progress' && task.progress >= 80}}"
+        bindtap="completeTask"
+      >
+        <view class="action-icon">✅</view>
+        <view class="action-content">
+          <view class="action-title">完成任务</view>
+          <view class="action-desc">标记测试任务完成</view>
+        </view>
+        <view class="action-arrow">→</view>
+      </view>
+    </view>
+  </view>
+</view>

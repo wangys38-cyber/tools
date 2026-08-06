@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目管理平台</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 头部导航 -->
+        <header class="header">
+            <div class="logo">项目管理平台</div>
+            <div class="nav">
+                <a href="#projects" class="nav-item active">项目管理</a>
+                <a href="#tasks" class="nav-item">任务管理</a>
+                <a href="#teams" class="nav-item">团队管理</a>
+                <div class="user-info">
+                    <span class="user-email" id="user-email"></span>
+                    <button id="logout-btn" class="btn secondary">登出</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主内容区域 -->
+        <main class="main">
+            <!-- 项目管理区域 -->
+            <section id="projects" class="section active">
+                <div class="section-header">
+                    <h2>项目管理</h2>
+                    <button id="add-project-btn" class="btn primary">
+                        <i class="fas fa-plus"></i> 添加项目
+                    </button>
+                </div>
+
+                <!-- 项目列表 -->
+                <div class="project-list">
+                    <div class="project-list-header">
+                        <div class="id-column">ID</div>
+                        <div class="name-column">项目名称</div>
+                        <div class="description-column">描述</div>
+                        <div class="owner-column">负责人</div>
+                        <div class="status-column">状态</div>
+                        <div class="actions-column">操作</div>
+                    </div>
+                    <div id="project-items" class="project-items">
+                        <!-- 项目项将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 任务管理区域 -->
+            <section id="tasks" class="section">
+                <div class="section-header">
+                    <h2>任务管理</h2>
+                    <button id="add-task-btn" class="btn primary">
+                        <i class="fas fa-plus"></i> 添加任务
+                    </button>
+                </div>
+
+                <!-- 任务筛选 -->
+                <div class="task-filter">
+                    <label for="project-filter">按项目筛选:</label>
+                    <select id="project-filter" class="select">
+                        <option value="all">所有项目</option>
+                    </select>
+                </div>
+
+                <!-- 任务列表 -->
+                <div class="task-list">
+                    <div class="task-list-header">
+                        <div class="id-column">ID</div>
+                        <div class="title-column">任务标题</div>
+                        <div class="project-column">项目</div>
+                        <div class="status-column">状态</div>
+                        <div class="priority-column">优先级</div>
+                        <div class="assignee-column">负责人</div>
+                        <div class="due-date-column">截止日期</div>
+                        <div class="actions-column">操作</div>
+                    </div>
+                    <div id="task-items" class="task-items">
+                        <!-- 任务项将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- 团队管理区域 -->
+            <section id="teams" class="section">
+                <div class="section-header">
+                    <h2>团队管理</h2>
+                    <button id="add-team-btn" class="btn primary">
+                        <i class="fas fa-plus"></i> 添加团队
+                    </button>
+                </div>
+
+                <!-- 团队列表 -->
+                <div class="team-list">
+                    <div class="team-list-header">
+                        <div class="id-column">ID</div>
+                        <div class="name-column">团队名称</div>
+                        <div class="description-column">描述</div>
+                        <div class="members-column">成员</div>
+                        <div class="actions-column">操作</div>
+                    </div>
+                    <div id="team-items" class="team-items">
+                        <!-- 团队项将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- 添加项目模态框 -->
+    <div id="add-project-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加项目</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="add-project-form">
+                <div class="form-group">
+                    <label for="project-name">项目名称</label>
+                    <input type="text" id="project-name" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label for="project-description">项目描述</label>
+                    <textarea id="project-description" class="textarea" rows="3"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn primary">保存</button>
+                    <button type="button" class="btn secondary close-modal">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑项目模态框 -->
+    <div id="edit-project-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑项目</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="edit-project-form">
+                <input type="hidden" id="edit-project-id">
+                <div class="form-group">
+                    <label for="edit-project-name">项目名称</label>
+                    <input type="text" id="edit-project-name" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-project-description">项目描述</label>
+                    <textarea id="edit-project-description" class="textarea" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-project-status">项目状态</label>
+                    <select id="edit-project-status" class="select">
+                        <option value="active">活跃</option>
+                        <option value="completed">已完成</option>
+                        <option value="on_hold">暂停</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn primary">保存</button>
+                    <button type="button" class="btn secondary close-modal">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 添加任务模态框 -->
+    <div id="add-task-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加任务</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="add-task-form">
+                <div class="form-group">
+                    <label for="task-project">项目</label>
+                    <select id="task-project" class="select" required>
+                        <option value="">选择项目</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="task-title">任务标题</label>
+                    <input type="text" id="task-title" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label for="task-description">任务描述</label>
+                    <textarea id="task-description" class="textarea" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="task-status">状态</label>
+                    <select id="task-status" class="select">
+                        <option value="todo">待办</option>
+                        <option value="in_progress">进行中</option>
+                        <option value="completed">已完成</option>
+                        <option value="blocked">阻塞</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="task-priority">优先级</label>
+                    <select id="task-priority" class="select">
+                        <option value="low">低</option>
+                        <option value="medium">中</option>
+                        <option value="high">高</option>
+                        <option value="urgent">紧急</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="task-assignee">负责人</label>
+                    <input type="text" id="task-assignee" class="input">
+                </div>
+                <div class="form-group">
+                    <label for="task-due-date">截止日期</label>
+                    <input type="date" id="task-due-date" class="input">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn primary">保存</button>
+                    <button type="button" class="btn secondary close-modal">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑任务模态框 -->
+    <div id="edit-task-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑任务</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="edit-task-form">
+                <input type="hidden" id="edit-task-id">
+                <div class="form-group">
+                    <label for="edit-task-project">项目</label>
+                    <select id="edit-task-project" class="select" required>
+                        <option value="">选择项目</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-task-title">任务标题</label>
+                    <input type="text" id="edit-task-title" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-task-description">任务描述</label>
+                    <textarea id="edit-task-description" class="textarea" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-task-status">状态</label>
+                    <select id="edit-task-status" class="select">
+                        <option value="todo">待办</option>
+                        <option value="in_progress">进行中</option>
+                        <option value="completed">已完成</option>
+                        <option value="blocked">阻塞</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-task-priority">优先级</label>
+                    <select id="edit-task-priority" class="select">
+                        <option value="low">低</option>
+                        <option value="medium">中</option>
+                        <option value="high">高</option>
+                        <option value="urgent">紧急</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-task-assignee">负责人</label>
+                    <input type="text" id="edit-task-assignee" class="input">
+                </div>
+                <div class="form-group">
+                    <label for="edit-task-due-date">截止日期</label>
+                    <input type="date" id="edit-task-due-date" class="input">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn primary">保存</button>
+                    <button type="button" class="btn secondary close-modal">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 添加团队模态框 -->
+    <div id="add-team-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加团队</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="add-team-form">
+                <div class="form-group">
+                    <label for="team-name">团队名称</label>
+                    <input type="text" id="team-name" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label for="team-description">团队描述</label>
+                    <textarea id="team-description" class="textarea" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="team-members">成员 (用逗号分隔)</label>
+                    <input type="text" id="team-members" class="input">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn primary">保存</button>
+                    <button type="button" class="btn secondary close-modal">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 编辑团队模态框 -->
+    <div id="edit-team-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑团队</h3>
+                <button class="close-btn">&times;</button>
+            </div>
+            <form id="edit-team-form">
+                <input type="hidden" id="edit-team-id">
+                <div class="form-group">
+                    <label for="edit-team-name">团队名称</label>
+                    <input type="text" id="edit-team-name" class="input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-team-description">团队描述</label>
+                    <textarea id="edit-team-description" class="textarea" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="edit-team-members">成员 (用逗号分隔)</label>
+                    <input type="text" id="edit-team-members" class="input">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn primary">保存</button>
+                    <button type="button" class="btn secondary close-modal">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 通知区域 -->
+    <div id="notification" class="notification"></div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

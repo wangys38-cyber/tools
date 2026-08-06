@@ -1,0 +1,61 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+build/
+*.egg
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Uploads and generated files
+toolbox/uploads/
+toolbox/pdfs/
+toolbox/output/
+
+# Configuration with secrets
+toolbox/ai_config.json
+*.env
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Logs
+*.log
+logs/
+
+# Test files
+toolbox/test_*.py
+toolbox/debug_*.py
+
+# Binary / dist files (too large for git)
+MD2PDF/dist_new/
+MD2PDF/dist/
+MD2PDF/dist_new2/
+toolbox/dist/
+*.exe
+*.dll
+*.pak
+
+# Build artifacts
+*.spec
+
+# Large asset directories
+toolbox/static/noteNB/assets/
