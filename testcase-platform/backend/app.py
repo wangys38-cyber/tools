@@ -64,16 +64,19 @@ if not os.path.exists(TEST_PROGRESS_FILE):
         json.dump({}, f)
 
 if not os.path.exists(USERS_FILE):
-    # 创建默认管理员用户
-    default_users = [
-        {
+    # 不再内置管理员账号：需要初始化时用环境变量提供
+    # TESTCASE_ADMIN_EMAIL / TESTCASE_ADMIN_PASSWORD
+    admin_email = os.environ.get('TESTCASE_ADMIN_EMAIL', '').strip()
+    admin_password = os.environ.get('TESTCASE_ADMIN_PASSWORD', '').strip()
+    default_users = []
+    if admin_email and admin_password:
+        default_users.append({
             'id': '1',
-            'email': 'wangys38@lenovo.com',
-            'password': hashlib.md5('*Wys#==！！'.encode()).hexdigest(),  # 密码加密存储
+            'email': admin_email,
+            'password': hashlib.md5(admin_password.encode()).hexdigest(),  # 密码加密存储
             'role': 'admin',  # admin, user
             'status': 'approved'  # pending, approved, rejected
-        }
-    ]
+        })
     with open(USERS_FILE, 'w') as f:
         json.dump(default_users, f)
 
