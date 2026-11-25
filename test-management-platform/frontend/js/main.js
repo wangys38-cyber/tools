@@ -24,10 +24,24 @@ let editingProject = null;
 let assignProject = null;
 let cancelingTestrunId = null;
 
-const ADMIN_CREDENTIALS = {
-    username: 'wangys38@lenovo.com',
-    password: '*Wys#==！！'
-};
+// 管理员账号不再写死在代码里：首次在本机用管理员登录时，把这组邮箱/密码记到 localStorage
+const ADMIN_STORAGE_KEY = 'test_management_admin';
+
+function getLocalAdmin() {
+    try {
+        const raw = localStorage.getItem(ADMIN_STORAGE_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function setLocalAdmin(username, password) {
+    localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify({
+        username: username.trim().toLowerCase(),
+        password: password
+    }));
+}
 
 function loadFromStorage() {
     modules = JSON.parse(localStorage.getItem(STORAGE_KEYS.MODULES) || '[]');
@@ -94,7 +108,16 @@ function login() {
     errorElement.style.display = 'none';
     
     if (role === 'admin') {
-        if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+        if (!getLocalAdmin()) {
+            if (!confirm('本机还没有管理员账号，是否把 ' + username + ' 设为本机管理员？')) {
+                errorElement.textContent = '已取消管理员账号设置';
+                errorElement.style.display = 'block';
+                return;
+            }
+            setLocalAdmin(username, password);
+        }
+        const localAdmin = getLocalAdmin();
+        if (localAdmin && localAdmin.username === username.trim().toLowerCase() && localAdmin.password === password) {
             currentUser = { username, role: 'admin' };
             saveToStorage();
             showMainPage();
